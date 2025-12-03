@@ -2,7 +2,7 @@ volumes:
   kong_db_data: {}  # Named volume to persist Postgres data across container restarts
 
 networks:
-  kong-soap-xml-net:      # Custom bridge network for isolated Kong and Postgres communication
+  kong-soap-xml-net-new:      # Custom bridge network for isolated Kong and Postgres communication
     driver: bridge
 
 # Common environment variables used by Kong services (bootstrap and CP)
@@ -12,18 +12,20 @@ x-kong-config: &kong-env
   KONG_PG_DATABASE: kong              # Name of the database to connect to
   KONG_PG_USER: kong                  # Database username
   KONG_PG_PASSWORD: kong              # Database password
-  KONG_LICENSE_DATA: "${KONG_LICENSE_DATA}"  # Kong Enterprise license passed via environment variable
+  #KONG_LICENSE_DATA: "${KONG_LICENSE_DATA}"  # Kong Enterprise license passed via environment variable
+  KONG_LICENSE_DATA: |
+    {"license":{"payload":{"admin_seats":"5","customer":"automation","dataplanes":"100","license_creation_date":"2025-11-02","license_expiration_date":"2025-12-20","license_key":"ASDASDASDASDASDASDASDASDASD_a1VASASD","product_subscription":"Konnect Enterprise","support_plan":"None"},"signature":"6faa0f99795259243bf432a5e56bd78bdc51e22aa8a17b6e4efc4f5e40197f2f6bb36b58e6fa5ba4b1b9a367e1395917a60bd76adc8f9b83bde25a236135972c","version":"1"}}
 
 services:
 
   kong-database-soap-xml-handling:
     container_name: kong-database-soap-xml-handling
-    image: postgres:latest           # Official Postgres image
+    image: postgres:14           # Official Postgres image
     restart: on-failure              # Restart if the container fails
     volumes:
       - kong_db_data:/var/lib/postgresql/data  # Mount the volume for persistent data
     networks:
-      - kong-soap-xml-net                  # Connect to the shared Kong network
+      - kong-soap-xml-net-new                 # Connect to the shared Kong network
     environment:
       POSTGRES_USER: kong            # Set DB user inside the container
       POSTGRES_DB: kong              # Create this database on first run
@@ -35,11 +37,12 @@ services:
       retries: 10
 
   kong-bootstrap:
-    image: 'kong/kong-gateway:3.11.0.2'  # Kong Gateway image (default to latest version)
+    #image: 'kong/kong-gateway:3.10.0.4'  # Kong Gateway image (default to latest version)
+    image: 'sharathchandrayd945/kong-soap-xml:3.10.0.4-1.4.1-12.9'
     platform: linux/${ARCHITECTURE}
     container_name: kong-bootstrap
     networks:
-      - kong-soap-xml-net
+      - kong-soap-xml-net-new
     depends_on:
       kong-database-soap-xml-handling:
         condition: service_healthy   # Wait until Postgres is up and healthy
@@ -50,12 +53,13 @@ services:
     command: kong migrations bootstrap  # Run DB migrations to initialize Kong schema
 
   kong-gateway-soap-xml-handling:
-    image: 'kong/kong-gateway:3.11.0.2'  # Main Kong Gateway Control Plane (default to latest version)
+    #image: 'kong/kong-gateway:3.10.0.4'  # Main Kong Gateway Control Plane (default to latest version)
+    image: 'sharathchandrayd945/kong-soap-xml:3.10.0.4-1.4.1-12.9'
     platform: linux/${ARCHITECTURE}
     container_name: kong-gateway-soap-xml-handling
     restart: on-failure
     networks:
-      - kong-soap-xml-net
+      - kong-soap-xml-net-new
     volumes:
       - ${PROJECT_DIR}/kong/plugins/soap-xml-request-handling:/usr/local/share/lua/5.1/kong/plugins/soap-xml-request-handling
       - ${PROJECT_DIR}/kong/plugins/soap-xml-response-handling:/usr/local/share/lua/5.1/kong/plugins/soap-xml-response-handling
@@ -75,7 +79,7 @@ services:
       KONG_PASSWORD: handyshake  # Required for logging in to Kong Manager (RBAC)
       SOAP_USERNAME: KongUser
       SOAP_PASSWORD: KongP@ssswOrd!
-      KONG_LOG_LEVEL: notice
+      KONG_LOG_LEVEL: debug
       KONG_NGINX_HTTP_CLIENT_BODY_BUFFER_SIZE: 8k
       #KONG_NGINX_PROXY_PROXY_REQUEST_BUFFERING: off
     depends_on:

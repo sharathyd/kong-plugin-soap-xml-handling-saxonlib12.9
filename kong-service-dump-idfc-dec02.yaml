@@ -1,0 +1,432 @@
+_format_version: "3.0"
+_info:
+  defaults: {}
+  select_tags:
+  - xmljsondemo
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: host.docker.internal
+  name: xml-request-mock-service
+  port: 3002
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: JSONtoXMLRequest
+    path_handling: v0
+    paths:
+    - /mock-json-to-xml-request
+    plugins:
+    - config:
+        access: []
+        body_filter:
+        - |-
+          -- If not replacing, let the body go normally
+          if not ngx.ctx.replace_error_body then
+            return
+          end
+
+          kong.log.notice("body_filter: replacing body")
+
+          -- Output our custom body
+          ngx.arg[1] = ngx.ctx.new_body
+          ngx.arg[2] = true  -- end of body
+        certificate: []
+        header_filter:
+        - |
+          -- Check status
+          local status = kong.response.get_status()
+          kong.log.notice("header_filter: status = ", status)
+
+          if status == 500 then
+            -- Mark flag in NGINX ctx (shared per-request)
+            ngx.ctx.replace_error_body = true
+
+            -- Prepare new body (store in ctx)
+            ngx.ctx.new_body = [[
+          <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+              <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+                <ns2:Ack>false</ns2:Ack>
+              </ns2:NotificationResponse>
+            </SOAP-ENV:Body>
+          </SOAP-ENV:Envelope>
+          ]]
+
+            -- Modify headers here (ONLY here)
+            kong.response.set_status(200)
+            kong.response.set_header("Content-Type", "text/xml")
+            kong.response.set_header("Content-Length", tostring(#ngx.ctx.new_body))
+          end
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      name: post-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        RouteXPathRegisterNs:
+        - soap,http://schemas.xmlsoap.org/soap/envelope/
+        RouteXPathTargets: null
+        SOAPAction_Header: "no"
+        VerboseRequest: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: null
+        xsltTransformBefore: '<?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="fn">          <xsl:output
+          method="xml" indent="yes" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Parse JSON to XML using json-to-xml function -->         <xsl:variable
+          name="json-xml" select="json-to-xml(string(.))"/>                  <!--
+          Extract the full request value -->         <xsl:variable name="full-request"
+          select="$json-xml//fn:map[@key=''serviceCall'']/fn:string[@key=''request'']"/>                  <!--
+          Split the pipe-separated values -->         <xsl:variable name="fields"
+          select="tokenize($full-request, ''\|'')"/>                  <!-- Extract
+          only the needed fields: 1,2,3,4,5,6, and last field -->         <xsl:variable
+          name="mapped-request">             <xsl:choose>                 <xsl:when
+          test="count($fields) >= 6">                     <!-- Fields 1-6 and last
+          field -->                     <xsl:value-of select="$fields[1]"/>|<xsl:value-of
+          select="$fields[2]"/>|<xsl:value-of select="$fields[3]"/>|<xsl:value-of
+          select="$fields[4]"/>|<xsl:value-of select="$fields[5]"/>|<xsl:value-of
+          select="$fields[6]"/>|<xsl:value-of select="$fields[last()]"/>                 </xsl:when>                 <xsl:otherwise>                     <!--
+          Fallback: return original if not enough fields -->                     <xsl:value-of
+          select="$full-request"/>                 </xsl:otherwise>             </xsl:choose>         </xsl:variable>                  <!--
+          Generate SOAP envelope -->         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">             <soap:Body>                 <ServiceCall
+          xmlns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">                     <Request>                         <xsl:value-of
+          select="$mapped-request"/>                     </Request>                 </ServiceCall>             </soap:Body>         </soap:Envelope>     </xsl:template>  </xsl:stylesheet>'
+      enabled: true
+      instance_name: JSONtoXMLRequest-2
+      name: soap-xml-request-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        VerboseResponse: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:temp="http://tempuri.org/"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="soap
+          temp fn">          <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Extract the Request value (not ServiceCallResult)
+          -->         <xsl:variable name="result" select="//temp:ServiceCall/temp:Request/text()"/>                  <!--
+          Create JSON structure using xml-to-json -->         <xsl:variable name="json-xml">             <fn:map
+          xmlns:fn="http://www.w3.org/2005/xpath-functions">                 <fn:map
+          key="serviceCallResponse">                     <fn:string key="serviceCallResult">                         <xsl:value-of
+          select="$result"/>                     </fn:string>                 </fn:map>             </fn:map>         </xsl:variable>                  <xsl:value-of
+          select="fn:xml-to-json($json-xml)"/>     </xsl:template>      </xsl:stylesheet>
+        xsltTransformBefore: null
+      enabled: true
+      name: soap-xml-response-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  - https_redirect_status_code: 426
+    name: soap-response-error-handle
+    path_handling: v0
+    paths:
+    - /soap-response-error-handle
+    plugins:
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        VerboseResponse: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"                 xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="S
+          ns0 ns1 fn">          <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Extract key values -->         <xsl:variable name="outputType"
+          select="//ns1:RsHeader/ns1:OutputType"/>         <xsl:variable name="custData"
+          select="//ns1:CustLnkdAcctInqData"/>         <xsl:variable name="rsHeader"
+          select="//ns1:RsHeader"/>         <xsl:variable name="errorData" select="//ns1:Stat/ns1:ErrorMessage"/>                  <!--
+          Create JSON structure based on OutputType -->         <xsl:variable name="json-xml">             <fn:map>                 <fn:map
+          key="CustLnkdAcctInqResp">                     <!-- Message Header - Success/Error
+          based on OutputType -->                     <fn:map key="msgHdr">                         <xsl:choose>                             <xsl:when
+          test="$outputType = '03'">                                 <fn:string key="rslt">OK</fn:string>                             </xsl:when>                             <xsl:when
+          test="$outputType = '01'">                                 <fn:string key="rslt">Error</fn:string>                                 <fn:array
+          key="error">                                     <fn:map>                                         <fn:string
+          key="cd">                                             <xsl:value-of select="$errorData/ns1:ErrorCode"/>                                         </fn:string>                                         <fn:string
+          key="rsn">                                             <xsl:value-of select="$errorData/ns1:ErrorMessage"/>                                         </fn:string>                                         <fn:string
+          key="srvc">kong Service</fn:string>                                     </fn:map>                                 </fn:array>                             </xsl:when>                             <xsl:otherwise>                                 <fn:string
+          key="rslt">UNKNOWN</fn:string>                             </xsl:otherwise>                         </xsl:choose>                     </fn:map>                                          <!--
+          Message Body -->                     <fn:map key="msgBdy">                         <xsl:if
+          test="$outputType = '03' and $custData">                             <!--
+          Customer Information for Success -->                             <fn:string
+          key="cstNm">                                 <xsl:value-of select="$custData/ns1:Name"/>                             </fn:string>                             <fn:string
+          key="cstTp">                                 <xsl:value-of select="$custData/ns1:CustTyp"/>                             </fn:string>                             <fn:string
+          key="titl">                                 <xsl:value-of select="$custData/ns1:Title"/>                             </fn:string>                             <fn:string
+          key="numOfChqBk">                                 <xsl:value-of select="$custData/ns1:NumOfChqBook"/>                             </fn:string>                             <fn:string
+          key="numOfCrds">                                 <xsl:value-of select="$custData/ns1:NumOfCards"/>                             </fn:string>                             <fn:string
+          key="numOfFc">                                 <xsl:value-of select="$custData/ns1:NumOfFac"/>                             </fn:string>                             <fn:string
+          key="cstLmt">                                 <xsl:value-of select="$custData/ns1:CustLmt"/>                             </fn:string>                             <fn:string
+          key="ttlBl">                                 <xsl:value-of select="$custData/ns1:TtlBal"/>                             </fn:string>                             <fn:string
+          key="crrCd">                                 <xsl:value-of select="$custData/ns1:CurrCode"/>                             </fn:string>                             <fn:string
+          key="usrNm">                                 <xsl:value-of select="$custData/ns1:UserName"/>                             </fn:string>                             <fn:string
+          key="stmtFrq">                                 <xsl:value-of select="$custData/ns1:StmtFreq"/>                             </fn:string>                             <fn:string
+          key="cstCrDt">                                 <xsl:value-of select="$custData/ns1:CustCrDt"/>                             </fn:string>                             <fn:string
+          key="ttlDr">                                 <xsl:value-of select="$custData/ns1:TtlDr"/>                             </fn:string>                             <fn:string
+          key="numOfDrAcct">                                 <xsl:value-of select="$custData/ns1:NumOfDrAcct"/>                             </fn:string>                             <fn:string
+          key="ttlCr">                                 <xsl:value-of select="$custData/ns1:TtlCr"/>                             </fn:string>                             <fn:string
+          key="numOfCrAcct">                                 <xsl:value-of select="$custData/ns1:NumOfCrAcct"/>                             </fn:string>                             <fn:string
+          key="drBlCTA">                                 <xsl:value-of select="$custData/ns1:DrBalCTA"/>                             </fn:string>                             <fn:string
+          key="numOfCTAAcctDrBal">                                 <xsl:value-of select="$custData/ns1:NumOfCTAAcctDrBal"/>                             </fn:string>                             <fn:string
+          key="crBlCTA">                                 <xsl:value-of select="$custData/ns1:CrBalCTA"/>                             </fn:string>                             <fn:string
+          key="numOfCTAAcctCrBal">                                 <xsl:value-of select="$custData/ns1:NumOfCTAAcctCrBal"/>                             </fn:string>                             <fn:string
+          key="ntWrth">                                 <xsl:value-of select="$custData/ns1:NetWrth"/>                             </fn:string>                             <fn:string
+          key="ttlAcct">                                 <xsl:value-of select="$custData/ns1:TtlAcct"/>                             </fn:string>                             <fn:string
+          key="trdCstTp">                                 <xsl:value-of select="$custData/ns1:TierdCustTyp"/>                             </fn:string>                             <fn:string
+          key="prmpt">                                 <xsl:value-of select="$custData/ns1:Prmpt"/>                             </fn:string>                             <fn:string
+          key="drBl">                                 <xsl:value-of select="$custData/ns1:DrBal"/>                             </fn:string>                             <fn:string
+          key="drlnAcct">                                 <xsl:value-of select="$custData/ns1:DrloanAcct"/>                             </fn:string>                             <fn:string
+          key="drBlDp">                                 <xsl:value-of select="$custData/ns1:DrBalDep"/>                             </fn:string>                             <fn:string
+          key="drpAcct">                                 <xsl:value-of select="$custData/ns1:DrepAcct"/>                             </fn:string>                             <fn:string
+          key="crBlDp">                                 <xsl:value-of select="$custData/ns1:CrBalDep"/>                             </fn:string>                             <fn:string
+          key="crDpAcct">                                 <xsl:value-of select="$custData/ns1:CrDepAcct"/>                             </fn:string>                             <fn:string
+          key="crBlLn">                                 <xsl:value-of select="$custData/ns1:CrBalLoan"/>                             </fn:string>                             <fn:string
+          key="crLnAcct">                                 <xsl:value-of select="$custData/ns1:CrLoanAcct"/>                             </fn:string>                             <fn:string
+          key="inca">                                 <xsl:value-of select="$custData/ns1:INCA"/>                             </fn:string>                             <fn:string
+          key="emlId">                                 <xsl:value-of select="$custData/ns1:Email"/>                             </fn:string>                             <fn:string
+          key="idNum">                                 <xsl:value-of select="$custData/ns1:IdNum"/>                             </fn:string>                             <fn:string
+          key="prmIdTp">                                 <xsl:value-of select="$custData/ns1:PrimIdTyp"/>                             </fn:string>                             <fn:string
+          key="blckLstd">                                 <xsl:value-of select="$custData/ns1:BlackListed"/>                             </fn:string>                             <fn:string
+          key="tbd">                                 <xsl:value-of select="$custData/ns1:Tbd"/>                             </fn:string>                             <fn:string
+          key="sttCd">                                 <xsl:value-of select="$custData/ns1:StateCode"/>                             </fn:string>                             <fn:string
+          key="stff">                                 <xsl:value-of select="$custData/ns1:Staff"/>                             </fn:string>                             <fn:string
+          key="ctyTwn">                                 <xsl:value-of select="$custData/ns1:CityTown"/>                             </fn:string>                             <fn:string
+          key="brchCd">                                 <xsl:value-of select="$custData/ns1:BrchCode"/>                             </fn:string>                             <fn:string
+          key="cstCt">                                 <xsl:value-of select="$custData/ns1:CustCat"/>                             </fn:string>                             <fn:string
+          key="cstStt">                                 <xsl:value-of select="$custData/ns1:CustStat"/>                             </fn:string>                             <fn:string
+          key="relnshpMgr">                                 <xsl:value-of select="$custData/ns1:RelnshpMgr"/>                             </fn:string>                             <fn:string
+          key="prpFlg">                                 <xsl:value-of select="$custData/ns1:PropFlag"/>                             </fn:string>                             <fn:string
+          key="pnNum">                                 <xsl:value-of select="$custData/ns1:PanNum"/>                             </fn:string>                             <fn:string
+          key="dsbrsmntDt">                                 <xsl:value-of select="$custData/ns1:DisbursementDt"/>                             </fn:string>                             <fn:string
+          key="grdnNm1">                                 <xsl:value-of select="$custData/ns1:GuardianName1"/>                             </fn:string>                             <fn:string
+          key="grdnAdd5">                                 <xsl:value-of select="$custData/ns1:GuardianAdd5"/>                             </fn:string>                             <fn:string
+          key="grdnAdd6">                                 <xsl:value-of select="$custData/ns1:GuardianAdd6"/>                             </fn:string>                             <fn:string
+          key="grdnAdd7">                                 <xsl:value-of select="$custData/ns1:GuardianAdd7"/>                             </fn:string>                             <fn:string
+          key="grdnAdd8">                                 <xsl:value-of select="$custData/ns1:GuardianAdd8"/>                             </fn:string>                             <fn:string
+          key="instlmtAmt">                                 <xsl:value-of select="$custData/ns1:InstlmtAmt"/>                             </fn:string>                             <fn:string
+          key="amntPayble">                                 <xsl:value-of select="$custData/ns1:AmntPayble"/>                             </fn:string>                                                          <!--
+          Collections Array -->                             <xsl:if test="$custData/ns1:Coll">                                 <fn:array
+          key="clctn">                                     <xsl:for-each select="$custData/ns1:Coll">                                         <fn:map>                                             <fn:string
+          key="exstCstId">                                                 <xsl:value-of
+          select="ns1:ExistCustId"/>                                             </fn:string>                                             <fn:string
+          key="acctStat">                                                 <xsl:value-of
+          select="ns1:AcctStat"/>                                             </fn:string>                                             <fn:string
+          key="inqOpt">                                                 <xsl:value-of
+          select="ns1:InqOpt"/>                                             </fn:string>                                             <fn:string
+          key="acctPrdNm">                                                 <xsl:value-of
+          select="ns1:AcctProdName"/>                                             </fn:string>                                             <fn:string
+          key="acctCrCd">                                                 <xsl:value-of
+          select="ns1:AcctCurCode"/>                                             </fn:string>                                             <fn:string
+          key="lnk">                                                 <xsl:value-of
+          select="ns1:Link"/>                                             </fn:string>                                             <fn:string
+          key="ttlBal">                                                 <xsl:value-of
+          select="ns1:TtlBal"/>                                             </fn:string>                                             <fn:string
+          key="acctCrLmt">                                                 <xsl:value-of
+          select="ns1:AcctCrLmt"/>                                             </fn:string>                                             <fn:string
+          key="cat">                                                 <xsl:value-of
+          select="ns1:Cat"/>                                             </fn:string>                                             <fn:string
+          key="sbCt">                                                 <xsl:value-of
+          select="ns1:SubCat"/>                                             </fn:string>                                             <fn:string
+          key="avlBl">                                                 <xsl:value-of
+          select="ns1:AvailBal"/>                                             </fn:string>                                             <fn:string
+          key="advVl">                                                 <xsl:value-of
+          select="ns1:AdvVal"/>                                             </fn:string>                                             <fn:string
+          key="issDt">                                                 <xsl:value-of
+          select="ns1:IssueDt"/>                                             </fn:string>                                             <fn:string
+          key="amt">                                                 <xsl:value-of
+          select="ns1:Amt"/>                                             </fn:string>                                             <fn:string
+          key="intRt">                                                 <xsl:value-of
+          select="ns1:IntRate"/>                                             </fn:string>                                             <fn:string
+          key="mtDt">                                                 <xsl:value-of
+          select="ns1:MatDt"/>                                             </fn:string>                                             <fn:string
+          key="hmBrchNum">                                                 <xsl:value-of
+          select="ns1:HomeBrchNum"/>                                             </fn:string>                                             <fn:string
+          key="prncplAmt">                                                 <xsl:value-of
+          select="ns1:PrncplAmt"/>                                             </fn:string>                                             <fn:string
+          key="trmLgth">                                                 <xsl:value-of
+          select="ns1:TermLgth"/>                                             </fn:string>                                             <fn:string
+          key="oDInd">                                                 <xsl:value-of
+          select="ns1:ODInd"/>                                             </fn:string>                                             <fn:string
+          key="brch">                                                 <xsl:value-of
+          select="ns1:Brch"/>                                             </fn:string>                                             <fn:string
+          key="acctNm">                                                 <xsl:value-of
+          select="ns1:AcctName"/>                                             </fn:string>                                             <fn:string
+          key="opnDt">                                                 <xsl:value-of
+          select="ns1:OpenDt"/>                                             </fn:string>                                             <fn:string
+          key="noCrStt">                                                 <xsl:value-of
+          select="ns1:NoCrStat"/>                                             </fn:string>                                             <fn:string
+          key="noDrStt">                                                 <xsl:value-of
+          select="ns1:NoDrStat"/>                                             </fn:string>                                             <fn:string
+          key="san">                                                 <xsl:value-of
+          select="ns1:SAN"/>                                             </fn:string>                                             <fn:string
+          key="dlnqStt">                                                 <xsl:value-of
+          select="ns1:DelinqStat"/>                                             </fn:string>                                             <fn:string
+          key="hldAmt">                                                 <xsl:value-of
+          select="ns1:HoldAmt"/>                                             </fn:string>                                             <fn:string
+          key="mop">                                                 <xsl:value-of
+          select="ns1:Mop"/>                                             </fn:string>                                             <fn:string
+          key="rdInstl">                                                 <xsl:value-of
+          select="ns1:RdInstl"/>                                             </fn:string>                                             <fn:string
+          key="nxtInstDt">                                                 <xsl:value-of
+          select="ns1:NxtInstDt"/>                                             </fn:string>                                             <fn:string
+          key="unclFnds">                                                 <xsl:value-of
+          select="ns1:UnclFunds"/>                                             </fn:string>                                             <fn:string
+          key="swpBl">                                                 <xsl:value-of
+          select="ns1:SwpBal"/>                                             </fn:string>                                             <fn:string
+          key="oDLmt">                                                 <xsl:value-of
+          select="ns1:ODLmt"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr1">                                                 <xsl:value-of
+          select="ns1:BrchAddr1"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr2">                                                 <xsl:value-of
+          select="ns1:BrchAddr2"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr3">                                                 <xsl:value-of
+          select="ns1:BrchAddr3"/>                                             </fn:string>                                             <fn:string
+          key="brchPstCode">                                                 <xsl:value-of
+          select="ns1:brchPstCode"/>                                             </fn:string>                                             <fn:string
+          key="brchIFSCCode">                                                 <xsl:value-of
+          select="ns1:brchIFSCCode"/>                                             </fn:string>                                             <fn:string
+          key="srcAccNum">                                                 <xsl:value-of
+          select="ns1:SrcAccNum"/>                                             </fn:string>                                             <fn:string
+          key="ModSweepFlag">                                                 <xsl:value-of
+          select="ns1:ModSweepFlag"/>                                             </fn:string>                                             <fn:string
+          key="effAvlBl">                                                 <xsl:value-of
+          select="ns1:EffAvailBal"/>                                             </fn:string>                                             <fn:string
+          key="dsbrsmntDt">                                                 <xsl:value-of
+          select="ns1:DisbursementDt"/>                                             </fn:string>                                             <fn:string
+          key="instlmtAmt">                                                 <xsl:value-of
+          select="ns1:InstlmtAmt"/>                                             </fn:string>                                             <fn:string
+          key="amntPybl">                                                 <xsl:value-of
+          select="ns1:AmntPayble"/>                                             </fn:string>                                             <fn:string
+          key="ttlPd">                                                 <xsl:value-of
+          select="ns1:TtlPd"/>                                             </fn:string>                                             <fn:string
+          key="lnDr">                                                 <xsl:value-of
+          select="ns1:LoanDur"/>                                             </fn:string>                                             <fn:string
+          key="lstPmtDt">                                                 <xsl:value-of
+          select="ns1:LastPmtDt"/>                                             </fn:string>                                             <fn:string
+          key="nxtInstlmntDt">                                                 <xsl:value-of
+          select="ns1:NxtInstlmntDt"/>                                             </fn:string>                                                                                          <!--
+          Nominee Details -->                                             <fn:map
+          key="nmnDtls">                                                 <fn:string
+          key="nmNm">                                                     <xsl:value-of
+          select="ns1:NomName"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd1">                                                     <xsl:value-of
+          select="ns1:NomAdd1"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd2">                                                     <xsl:value-of
+          select="ns1:NomAdd2"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd3">                                                     <xsl:value-of
+          select="ns1:NomAdd3"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd4">                                                     <xsl:value-of
+          select="ns1:NomAdd4"/>                                                 </fn:string>                                                 <fn:string
+          key="nmCntryCd">                                                     <xsl:value-of
+          select="ns1:NomCountryCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmSttCd">                                                     <xsl:value-of
+          select="ns1:NomStateCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmCtyCd">                                                     <xsl:value-of
+          select="ns1:NomCityCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmDOB">                                                     <xsl:value-of
+          select="ns1:NomDOB"/>                                                 </fn:string>                                             </fn:map>                                                                                          <!--
+          Guardian Details -->                                             <fn:map
+          key="grdnDtls">                                                 <fn:string
+          key="grdnNm">                                                     <xsl:value-of
+          select="ns1:GuardianName"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd1">                                                     <xsl:value-of
+          select="ns1:GuardianAdd1"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd2">                                                     <xsl:value-of
+          select="ns1:GuardianAdd2"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd3">                                                     <xsl:value-of
+          select="ns1:GuardianAdd3"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd4">                                                     <xsl:value-of
+          select="ns1:GuardianAdd4"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnRl">                                                     <xsl:value-of
+          select="ns1:GuardianRel"/>                                                 </fn:string>                                             </fn:map>                                         </fn:map>                                     </xsl:for-each>                                 </fn:array>                             </xsl:if>                                                          <!--
+          Contact Details -->                             <fn:map key="cntctDtls">                                 <fn:map
+          key="addr">                                     <fn:string key="drFltNum">                                         <xsl:value-of
+          select="$custData/ns1:DoorFlatNum"/>                                     </fn:string>                                     <fn:string
+          key="bldgSoc">                                         <xsl:value-of select="$custData/ns1:BldgSoc"/>                                     </fn:string>                                     <fn:string
+          key="stNm">                                         <xsl:value-of select="$custData/ns1:StName"/>                                     </fn:string>                                     <fn:string
+          key="lclAddr">                                         <xsl:value-of select="$custData/ns1:LocalAddr"/>                                     </fn:string>                                     <fn:string
+          key="pstCd">                                         <xsl:value-of select="$custData/ns1:PstCode"/>                                     </fn:string>                                 </fn:map>                                 <fn:string
+          key="phnHm">                                     <xsl:value-of select="$custData/ns1:PhnHome"/>                                 </fn:string>                                 <fn:string
+          key="fxNum">                                     <xsl:value-of select="$custData/ns1:FaxNum"/>                                 </fn:string>                                 <fn:string
+          key="cntryOfRs">                                     <xsl:value-of select="$custData/ns1:CountryOfRes"/>                                 </fn:string>                                 <fn:string
+          key="phnBss">                                     <xsl:value-of select="$custData/ns1:PhnBuss"/>                                 </fn:string>                                 <fn:string
+          key="mobNum">                                     <xsl:value-of select="$custData/ns1:MobileNum"/>                                 </fn:string>                                 <fn:string
+          key="ntlCd">                                     <xsl:value-of select="$custData/ns1:NatlCode"/>                                 </fn:string>                             </fn:map>                         </xsl:if>                     </fn:map>                 </fn:map>             </fn:map>         </xsl:variable>                  <xsl:value-of
+          select="fn:xml-to-json($json-xml)"/>     </xsl:template>      </xsl:stylesheet>
+        xsltTransformBefore: null
+      enabled: true
+      name: soap-xml-response-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  tags:
+  - xmljsondemo
+  write_timeout: 60000
