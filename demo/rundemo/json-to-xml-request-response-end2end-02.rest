@@ -1,0 +1,227 @@
+
+### SCENARIO #2
+### JSON Request -> XML Request and XML Response -> JSON Response End to End Test
+###
+### - Transform JSON request to XML request,
+### - XML Request to mock SOAP service and echoed back same XML response
+### - Transform XML response to JSON response to client
+###
+
+### Service Name: json-xml-mock-service
+### Upstream End point - http://host.docker.internal:3002/soap-service
+### Kong End point - http://localhost:9000/json-xml-request-end2end-02/soap-service
+
+
+### JSON Request
+{
+  "serviceCall": {
+"request": "1.1|197254|bgbfd|8999739099|2.00|Digital Mandate Registration|a0t7200000GcIHHAA3|CAPITAL FIRST LIMITED||8999739099|401000024966|||8999739099||5430-N|||UTIB0000001|||pay@CapitalFirstTest.com|03/11/2025|03/12/2033|22233.00|MNTH|M||401000024966|123456080"
+  }
+}
+
+### Expected SOAP Request (JSON to XML transformation) 
+<soap:Envelope
+	xmlns:soap=http://schemas.xmlsoap.org/soap/envelope/>
+	<soap:Body>
+		<ServiceCall
+			xmlns=http://tempuri.org/
+			xmlns:soap=http://schemas.xmlsoap.org/soap/envelope/>
+			<Request>1.1|197254|bgbfd|9855132980|2.00|Digital Mandate Registration|123456080</Request>
+		</ServiceCall>
+	</soap:Body>
+</soap:Envelope>
+
+### SOAP Response from Upstream 
+<soap:Envelope
+	xmlns:soap=http://schemas.xmlsoap.org/soap/envelope/
+	xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance
+	xmlns:xsd=http://www.w3.org/2001/XMLSchema>
+	<soap:Body>
+		<ServiceCallResponse
+			xmlns=http://tempuri.org/>
+			<ServiceCallResult>1.1|197254|bgbfd|9855132980|2.00|Digital Mandate Registration|123456080|P04082-170806967.VR2327|https://www.payment.com/?ref1|ref00|Success
+			</RPPServiceCallResult>
+		</RPPServiceCallResponse>
+	</soap:Body>
+</soap:Envelope>;
+
+### Expected JSON Response (XML to JSON transformation) 
+{
+  "serviceCallResponse": {
+    "serviceCallResult": "1.1|197254|bgbfd|9855132980|2.00|Digital Mandate Registration|123456080|P04082-170806967.VR2327|https://www.payment.com/?ref1|ref00|Success"
+  }
+}
+
+
+-----
+
+## The XSLT should extract from ServiceCall/Request instead of ServiceCallResponse/ServiceCallResult
+## use this xslt in your service , as your mock XML response just echoing the soap resposne 
+# this soap response contains servicecall/request instead of servicecallresponse/servicecallresult
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:temp="http://tempuri.org/"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                exclude-result-prefixes="soap temp fn">
+    
+    <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>
+    
+    <xsl:template match="/">
+        <!-- Extract the Request value (not ServiceCallResult) -->
+        <xsl:variable name="result" select="//temp:ServiceCall/temp:Request/text()"/>
+        
+        <!-- Create JSON structure using xml-to-json -->
+        <xsl:variable name="json-xml">
+            <fn:map xmlns:fn="http://www.w3.org/2005/xpath-functions">
+                <fn:map key="serviceCallResponse">
+                    <fn:string key="serviceCallResult">
+                        <xsl:value-of select="$result"/>
+                    </fn:string>
+                </fn:map>
+            </fn:map>
+        </xsl:variable>
+        
+        <xsl:value-of select="fn:xml-to-json($json-xml)"/>
+    </xsl:template>
+    
+</xsl:stylesheet>
+
+## 1. XSLT xml-to-json() Function  -- Use this for actual response conversion
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:temp="http://tempuri.org/"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                exclude-result-prefixes="soap temp fn">
+    
+    <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>
+    
+    <xsl:template match="/">
+        <!-- Extract the ServiceCallResult value -->
+        <xsl:variable name="result" select="//temp:ServiceCallResponse/temp:ServiceCallResult/text()"/>
+        
+        <!-- Create JSON structure using xml-to-json -->
+        <xsl:variable name="json-xml">
+            <fn:map xmlns:fn="http://www.w3.org/2005/xpath-functions">
+                <fn:map key="serviceCallResponse">
+                    <fn:string key="serviceCallResult">
+                        <xsl:value-of select="$result"/>
+                    </fn:string>
+                </fn:map>
+            </fn:map>
+        </xsl:variable>
+        
+        <xsl:value-of select="fn:xml-to-json($json-xml)"/>
+    </xsl:template>
+    
+</xsl:stylesheet>
+
+
+### End to end testing - JSON to XML request and XML to JSON response
+### service name - xml-request-mock-service 
+curl --location 'http://localhost:9000/json-xml-request-end2end-02/soap-service' \
+--header 'Content-Type: application/json' \
+--data '{
+  "serviceCall": {
+    "request": "1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|a0t7200000GcIHHAA3|CAPITAL FIRST LIMITED||8999739099|401000024966|||8999739099||5430-N|||UTIB0000001|||pay@CapitalFirstTest.com|03/11/2025|03/12/2033|22233.00|MNTH|M||401000024966|123456080123"
+  }
+}'
+
+### output 
+HTTP/1.1 200 OK
+Content-Type: application/json
+Connection: close
+ETag: W/"12a-jrFluwFPrEoachP91lGGYqB1F04"
+X-Powered-By: Express
+Date: Wed, 26 Nov 2025 07:24:22 GMT
+Content-Length: 129
+X-Kong-Upstream-Latency: 5
+X-Kong-Proxy-Latency: 4
+Via: 1.1 kong/3.11.0.2-enterprise-edition
+Server: kong/3.11.0.2-enterprise-edition
+X-Kong-Request-Id: dacdd8022ffc2544f451e525e8eb3b05
+
+{
+  "serviceCallResponse": {
+    "serviceCallResult": "1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|123456080123"
+  }
+}
+
+
+### 
+
+POST http://localhost:9000/json-xml-response-01
+Content-Type: application/json
+
+{
+  "json": {
+    "NotificationResponse": {
+      "Ack": "true"
+    }
+  }
+}
+### 
+curl http://localhost:9000/json-xml-response-01
+Content-Type: application/json
+
+{
+  "json": {
+    "NotificationResponse": {
+      "Ack": "true"
+    }
+  }
+}
+
+### backend soap-xml-request-handling logs -- json input 
+2025/12/04 07:24:22 [debug] 2628#0: *8985 [kong] xmlgeneral.lua:983 [soap-xml-request-handling] XSLT transformation, BEGIN: 
+<InternalkongRoot>{ "serviceCall": { "request": "1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|a0t7200000GcIHHAA3|CAPITAL FIRST LIMITED||8999739099|401000024966|||8999739099||5430-N|||UTIB0000001|||pay@CapitalFirstTest.com|03/11/2025|03/12/2033|22233.00|MNTH|M||401000024966|123456080123" }
+
+}</InternalkongRoot>
+
+
+## backend soap-xml-request-handling logs - json request to xml request conversion 
+
+2025/12/04 07:24:22 [debug] 2628#0: *8985 [kong] xmlgeneral.lua:1065 [soap-xml-request-handling] XSLT transformation, END: 
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+
+   <soap:Body>
+
+      <ServiceCall xmlns="http://tempuri.org/">
+
+         <Request>1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|123456080123</Request>
+
+      </ServiceCall>
+
+   </soap:Body>
+
+</soap:Envelope>
+
+
+### backend mock soap service response - soap-xml-response-handling logs
+2025/12/04 07:24:22 [debug] 2628#0: *8985 [kong] xmlgeneral.lua:983 [soap-xml-response-handling] XSLT transformation, BEGIN: 
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+
+   <soap:Body>
+
+      <ServiceCall xmlns="http://tempuri.org/">
+
+         <Request>1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|123456080123</Request>
+
+      </ServiceCall>
+
+   </soap:Body>
+
+</soap:Envelope>
+
+
+## backend soap-xml-response-handling logs - xml to json response conversion 
+
+2025/12/2604 07:24:22 [debug] 2628#0: *8985 [kong] xmlgeneral.lua:1065 [soap-xml-response-handling] XSLT transformation, END: 
+{"serviceCallResponse":{"serviceCallResult":"1.1|197254|bgbfd|18999739099|12.00|Test Digital Mandate Registration|123456080123"}}
+
+
+/json-xml-response-01

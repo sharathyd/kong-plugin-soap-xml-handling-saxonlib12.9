@@ -1,0 +1,170 @@
+
+### SCENARIO #1 - JSON Response to XML Response
+
+### - Transform JSON response to XML response
+### - Log 200 Ok with custom SOAP response if any status code != 200
+### - Log custom message if any error
+
+
+### Service Name: xml-json-mock-service
+### Upstream End point - http://host.docker.internal:3003
+### Kong End point - http://localhost:9000/json-xml-response-01
+
+Help me to generate a XSLT for the below transformation from JSON to XML. use json to xml function
+
+### Expected JSON Response
+```json
+{
+  "NotificationResponse": {
+    "Ack": "true"
+  }
+}
+```
+
+### Expected XML Response
+<SOAP-ENV:Envelope
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+	<SOAP-ENV:Header/>
+	<SOAP-ENV:Body>
+		<ns2:NotificationResponse
+			xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+			<ns2:Ack>true</ns2:Ack>
+		</ns2:NotificationResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
+
+### XSLT #1, Outputs <SOAP-ENV:Envelope> with SOAP-ENV namespace
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions" xpath-default-namespace="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="fn">
+	<xsl:output method="xml" indent="yes" omit-xml-declaration="no"/>
+	<xsl:template match="/">
+		<xsl:variable name="json_var" select="fn:json-to-xml(.)"/>
+		<SOAP-ENV:Envelope
+			xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+			<SOAP-ENV:Header/>
+			<SOAP-ENV:Body>
+				<ns2:NotificationResponse
+					xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+					<ns2:Ack>
+						<xsl:choose>
+							<xsl:when test="$json_var/map/map[@key='json']/map[@key='NotificationResponse']/string[@key='Ack']">
+								<xsl:value-of select="$json_var/map/map[@key='json']/map[@key='NotificationResponse']/string[@key='Ack']"/>
+							</xsl:when>
+							<xsl:when test="$json_var/map/map[@key='NotificationResponse']/string[@key='Ack']">
+								<xsl:value-of select="$json_var/map/map[@key='NotificationResponse']/string[@key='Ack']"/>
+							</xsl:when>
+							<xsl:when test="$json_var//string[@key='Ack']">
+								<xsl:value-of select="$json_var//string[@key='Ack']"/>
+							</xsl:when>
+						</xsl:choose>
+					</ns2:Ack>
+				</ns2:NotificationResponse>
+			</SOAP-ENV:Body>
+		</SOAP-ENV:Envelope>
+	</xsl:template>
+</xsl:stylesheet>
+
+
+### XSLT #2 more genaric 
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions"
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+    exclude-result-prefixes="fn">
+
+    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+    <xsl:strip-space elements="*"/>
+
+    <!-- Main template -->
+    <xsl:template match="/">
+        <!-- Parse the input JSON -->
+        <xsl:variable name="json-data" select="json-to-xml(.)"/>
+        
+        <!-- Create SOAP envelope with SOAP-ENV namespace -->
+        <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+                <!-- Process the JSON data dynamically -->
+                <xsl:apply-templates select="$json-data" mode="json-to-soap"/>
+            </SOAP-ENV:Body>
+        </SOAP-ENV:Envelope>
+    </xsl:template>
+
+    <!-- Template to handle JSON map structure -->
+    <xsl:template match="fn:map" mode="json-to-soap">
+        <xsl:for-each select="fn:*[@key]">
+            <xsl:choose>
+                <!-- Handle NotificationResponse specifically -->
+                <xsl:when test="@key = 'NotificationResponse'">
+                    <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+                        <xsl:apply-templates select="." mode="process-content"/>
+                    </ns2:NotificationResponse>
+                </xsl:when>
+                <!-- Handle other root elements generically -->
+                <xsl:otherwise>
+                    <xsl:element name="ns2:{@key}" namespace="http://soap.sforce.com/2005/09/outbound">
+                        <xsl:apply-templates select="." mode="process-content"/>
+                    </xsl:element>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:for-each>
+    </xsl:template>
+
+    <!-- Template to process content of JSON elements -->
+    <xsl:template match="fn:*" mode="process-content">
+        <xsl:choose>
+            <!-- If it's a map, process its children -->
+            <xsl:when test="self::fn:map">
+                <xsl:for-each select="fn:*[@key]">
+                    <xsl:element name="ns2:{@key}" namespace="http://soap.sforce.com/2005/09/outbound">
+                        <xsl:apply-templates select="." mode="process-content"/>
+                    </xsl:element>
+                </xsl:for-each>
+            </xsl:when>
+            <!-- If it's an array, process each item -->
+            <xsl:when test="self::fn:array">
+                <xsl:for-each select="fn:*">
+                    <xsl:apply-templates select="." mode="process-content"/>
+                </xsl:for-each>
+            </xsl:when>
+            <!-- If it's a string, boolean, or number, output its value -->
+            <xsl:otherwise>
+                <xsl:value-of select="."/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+</xsl:stylesheet>
+
+###
+curl --location 'http://localhost:9000/json-xml-response-01' \
+--header 'Content-Type: application/json' \
+--data '{
+  "NotificationResponse": {
+    "Ack": "true"
+  }
+}'
+
+### Curl command 
+curl --location 'http://localhost:9000/json-xml-response-01' \
+--header 'Content-Type: application/json' \
+--data '{
+  "NotificationResponse": {
+    "Ack": "false"
+  }
+}'
+
+### Curl Response
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+                   xmlns:sf="http://soap.sforce.com/2005/09/outbound">
+   <SOAP-ENV:Header/>
+   <SOAP-ENV:Body>
+      <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+         <ns2:Ack>true</ns2:Ack>
+      </ns2:NotificationResponse>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

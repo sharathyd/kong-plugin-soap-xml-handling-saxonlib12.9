@@ -1,0 +1,1366 @@
+
+
+### SCENARIO #3
+### - XML Response to JSON Response
+### - Error handling outputType=01 or 03.
+### - custom message to log if any 500 error
+
+### Service Name: json-xml-mock-service
+### Upstream End point - http://host.docker.internal:3002/soap-service
+### Kong End point - http://localhost:9000/xml-json-response-error-handle-03/soap-service
+
+
+
+## Expected Sample Success XML Response, OutputType=03
+##
+<?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope
+    xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+    <S:Body>
+        <ns0:enquireCustomerLinkedAccountsResponse
+            xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"
+            xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema">
+            <CustLnkdAcctInqRs>
+                <ns1:RsHeader>
+                    <ns1:Filler1>0</ns1:Filler1>
+                    <ns1:MsgLen>0</ns1:MsgLen>
+                    <ns1:Filler2>00</ns1:Filler2>
+                    <ns1:MsgTyp>0</ns1:MsgTyp>
+                    <ns1:Filler3>1194</ns1:Filler3>
+                    <ns1:CycNum>0</ns1:CycNum>
+                    <ns1:MsgNum>0</ns1:MsgNum>
+                    <ns1:SegNum>0</ns1:SegNum>
+                    <ns1:FrntEndNum>0</ns1:FrntEndNum>
+                    <ns1:TermlNum>5057</ns1:TermlNum>
+                    <ns1:InstNum>3</ns1:InstNum>
+                    <ns1:BrchNum>41101</ns1:BrchNum>
+                    <ns1:WorkstationNum>57</ns1:WorkstationNum>
+                    <ns1:TellerNum>9903</ns1:TellerNum>
+                    <ns1:TrnNum>060450</ns1:TrnNum>
+                    <ns1:JrnlNum>908657</ns1:JrnlNum>
+                    <ns1:RsHdrDt>0000</ns1:RsHdrDt>
+                    <ns1:Filler4>4</ns1:Filler4>
+                    <ns1:Filler5>5</ns1:Filler5>
+                    <ns1:Filler6>90</ns1:Filler6>
+                    <ns1:Flag1>0</ns1:Flag1>
+                    <ns1:Flag2>0</ns1:Flag2>
+                    <ns1:Flag3>0</ns1:Flag3>
+                    <ns1:Flag4>0</ns1:Flag4>
+                    <ns1:Filler9>  00000000        000000000000000000000000000000                                   0000</ns1:Filler9>
+                    <ns1:OutputType>03</ns1:OutputType>
+                </ns1:RsHeader>
+                <ns1:CustLnkdAcctInqData>
+                    <ns1:CustNum>1015867163</ns1:CustNum>
+                    <ns1:CustTyp>01</ns1:CustTyp>
+                    <ns1:RelnshpMgr>0</ns1:RelnshpMgr>
+                    <ns1:Title>1</ns1:Title>
+                    <ns1:Name>Mr. Raj Anand Gupta</ns1:Name>
+                    <ns1:DoorFlatNum>ADD1001848</ns1:DoorFlatNum>
+                    <ns1:BldgSoc>ADD2001848</ns1:BldgSoc>
+                    <ns1:StName>ADD3001848</ns1:StName>
+                    <ns1:LocalAddr>NORTH GOA                          N</ns1:LocalAddr>
+                    <ns1:PstCode>513745</ns1:PstCode>
+                    <ns1:PhnHome>918108712546</ns1:PhnHome>
+                    <ns1:FaxNum></ns1:FaxNum>
+                    <ns1:CountryOfRes>IN</ns1:CountryOfRes>
+                    <ns1:PhnBuss></ns1:PhnBuss>
+                    <ns1:MobileNum></ns1:MobileNum>
+                    <ns1:NatlCode>IN</ns1:NatlCode>
+                    <ns1:NumOfChqBook>01</ns1:NumOfChqBook>
+                    <ns1:NumOfCards>00</ns1:NumOfCards>
+                    <ns1:NumOfFac>0000</ns1:NumOfFac>
+                    <ns1:CustLmt>0.00</ns1:CustLmt>
+                    <ns1:TtlBal>53782.00</ns1:TtlBal>
+                    <ns1:CurrCode>INR</ns1:CurrCode>
+                    <ns1:UserName>00</ns1:UserName>
+                    <ns1:StmtFreq></ns1:StmtFreq>
+                    <ns1:CustCrDt>17042017</ns1:CustCrDt>
+                    <ns1:TtlDr>0.00</ns1:TtlDr>
+                    <ns1:NumOfDrAcct>0</ns1:NumOfDrAcct>
+                    <ns1:TtlCr>53782.00</ns1:TtlCr>
+                    <ns1:NumOfCrAcct>314</ns1:NumOfCrAcct>
+                    <ns1:DrBalCTA>0.00</ns1:DrBalCTA>
+                    <ns1:NumOfCTAAcctDrBal>0</ns1:NumOfCTAAcctDrBal>
+                    <ns1:CrBalCTA>0.00</ns1:CrBalCTA>
+                    <ns1:NumOfCTAAcctCrBal>0</ns1:NumOfCTAAcctCrBal>
+                    <ns1:NetWrth>53782.00</ns1:NetWrth>
+                    <ns1:TtlAcct>314</ns1:TtlAcct>
+                    <ns1:TierdCustTyp>0169</ns1:TierdCustTyp>
+                    <ns1:Prmpt>INDIVIDUAL-SUPER SEN</ns1:Prmpt>
+                    <ns1:DrBal>0.00</ns1:DrBal>
+                    <ns1:DrloanAcct>0</ns1:DrloanAcct>
+                    <ns1:DrBalDep>0.00</ns1:DrBalDep>
+                    <ns1:DrepAcct>0</ns1:DrepAcct>
+                    <ns1:CrBalDep>53782.00</ns1:CrBalDep>
+                    <ns1:CrDepAcct>314</ns1:CrDepAcct>
+                    <ns1:CrBalLoan>0.00</ns1:CrBalLoan>
+                    <ns1:CrLoanAcct>0</ns1:CrLoanAcct>
+                    <ns1:INCA>0.00</ns1:INCA>
+                    <ns1:Email>raj1@yahoo.co.in</ns1:Email>
+                    <ns1:IdNum>WCURL7413O       SS</ns1:IdNum>
+                    <ns1:PrimIdTyp>07</ns1:PrimIdTyp>
+                    <ns1:BlackListed>N</ns1:BlackListed>
+                    <ns1:Tbd></ns1:Tbd>
+                    <ns1:StateCode>68</ns1:StateCode>
+                    <ns1:Staff>SS</ns1:Staff>
+                    <ns1:CityTown>NORTH GOA</ns1:CityTown>
+                    <ns1:BrchCode>41101</ns1:BrchCode>
+                    <ns1:CustCat>I</ns1:CustCat>
+                    <ns1:CustStat>A</ns1:CustStat>
+                    <ns1:PropFlag>N</ns1:PropFlag>
+                    <ns1:PanNum>WCURL7413O</ns1:PanNum>
+                    <ns1:GuardianName1></ns1:GuardianName1>
+                    <ns1:GuardianAdd5></ns1:GuardianAdd5>
+                    <ns1:GuardianAdd6></ns1:GuardianAdd6>
+                    <ns1:GuardianAdd7></ns1:GuardianAdd7>
+                    <ns1:GuardianAdd8></ns1:GuardianAdd8>
+                    <ns1:DisbursementDt>00000000</ns1:DisbursementDt>
+                    <ns1:InstlmtAmt>000000000</ns1:InstlmtAmt>
+                    <ns1:AmntPayble>0.00</ns1:AmntPayble>
+                    <ns1:Coll>
+                        <ns1:ExistCustId>10000821749</ns1:ExistCustId>
+                        <ns1:AcctStat>CLOS</ns1:AcctStat>
+                        <ns1:InqOpt>D</ns1:InqOpt>
+                        <ns1:AcctProdName>Short Term Deposit - Senior</ns1:AcctProdName>
+                        <ns1:AcctCurCode>INR</ns1:AcctCurCode>
+                        <ns1:Link>OWN</ns1:Link>
+                        <ns1:TtlBal>0.00</ns1:TtlBal>
+                        <ns1:AcctCrLmt>0.00</ns1:AcctCrLmt>
+                        <ns1:Cat>3000</ns1:Cat>
+                        <ns1:SubCat>6029</ns1:SubCat>
+                        <ns1:AvailBal>0.00</ns1:AvailBal>
+                        <ns1:AdvVal>0.00</ns1:AdvVal>
+                        <ns1:IssueDt>19120023</ns1:IssueDt>
+                        <ns1:Amt>10382.00CR</ns1:Amt>
+                        <ns1:IntRate>7.75</ns1:IntRate>
+                        <ns1:MatDt>04/02/2018</ns1:MatDt>
+                        <ns1:HomeBrchNum>41101</ns1:HomeBrchNum>
+                        <ns1:PrncplAmt>10000.00</ns1:PrncplAmt>
+                        <ns1:TermLgth>80D</ns1:TermLgth>
+                        <ns1:ODInd>N</ns1:ODInd>
+                        <ns1:Brch>SONKHEDA BRANCH</ns1:Brch>
+                        <ns1:AcctName>Mr. Raj Anand Gupta</ns1:AcctName>
+                        <ns1:OpenDt>08082017</ns1:OpenDt>
+                        <ns1:NoCrStat>N</ns1:NoCrStat>
+                        <ns1:NoDrStat>N</ns1:NoDrStat>
+                        <ns1:SAN></ns1:SAN>
+                        <ns1:DelinqStat>00</ns1:DelinqStat>
+                        <ns1:HoldAmt>0.00</ns1:HoldAmt>
+                        <ns1:Mop>SINGLY</ns1:Mop>
+                        <ns1:RdInstl></ns1:RdInstl>
+                        <ns1:NxtInstDt></ns1:NxtInstDt>
+                        <ns1:UnclFunds>0.00</ns1:UnclFunds>
+                        <ns1:SwpBal>0.00</ns1:SwpBal>
+                        <ns1:ODLmt>0.00</ns1:ODLmt>
+                        <ns1:BrchAddr1>Ground Floor, Ward No. 10,</ns1:BrchAddr1>
+                        <ns1:BrchAddr2>Bazaar Mohalla, Village Sonkheda,</ns1:BrchAddr2>
+                        <ns1:BrchAddr3>Tehsil Itarsi, Sonkheda</ns1:BrchAddr3>
+                        <ns1:brchPstCode>461111</ns1:brchPstCode>
+                        <ns1:brchIFSCCode>IDFB0041101</ns1:brchIFSCCode>
+                        <ns1:SrcAccNum>10000693726</ns1:SrcAccNum>
+                        <ns1:ModSweepFlag>N</ns1:ModSweepFlag>
+                        <ns1:NomName></ns1:NomName>
+                        <ns1:NomAdd1></ns1:NomAdd1>
+                        <ns1:NomAdd2></ns1:NomAdd2>
+                        <ns1:NomAdd3></ns1:NomAdd3>
+                        <ns1:NomAdd4></ns1:NomAdd4>
+                        <ns1:NomCountryCode></ns1:NomCountryCode>
+                        <ns1:NomStateCode></ns1:NomStateCode>
+                        <ns1:NomCityCode></ns1:NomCityCode>
+                        <ns1:NomDOB>00000000</ns1:NomDOB>
+                        <ns1:GuardianName></ns1:GuardianName>
+                        <ns1:GuardianAdd1></ns1:GuardianAdd1>
+                        <ns1:GuardianAdd2></ns1:GuardianAdd2>
+                        <ns1:GuardianAdd3></ns1:GuardianAdd3>
+                        <ns1:GuardianAdd4></ns1:GuardianAdd4>
+                        <ns1:GuardianRel></ns1:GuardianRel>
+                        <ns1:EffAvailBal>0.00</ns1:EffAvailBal>
+                        <ns1:DisbursementDt></ns1:DisbursementDt>
+                        <ns1:InstlmtAmt></ns1:InstlmtAmt>
+                        <ns1:AmntPayble></ns1:AmntPayble>
+                        <ns1:TtlPd></ns1:TtlPd>
+                        <ns1:LoanDur>0</ns1:LoanDur>
+                        <ns1:LastPmtDt></ns1:LastPmtDt>
+                        <ns1:NxtInstlmntDt></ns1:NxtInstlmntDt>
+                    </ns1:Coll>
+                    <ns1:Coll>
+                        <ns1:ExistCustId>10000821772</ns1:ExistCustId>
+                        <ns1:AcctStat>CLOS</ns1:AcctStat>
+                        <ns1:InqOpt>D</ns1:InqOpt>
+                        <ns1:AcctProdName>FD - Senior Citizen-Payout</ns1:AcctProdName>
+                        <ns1:AcctCurCode>INR</ns1:AcctCurCode>
+                        <ns1:Link>OWN</ns1:Link>
+                        <ns1:TtlBal>0.00</ns1:TtlBal>
+                        <ns1:AcctCrLmt>0.00</ns1:AcctCrLmt>
+                        <ns1:Cat>3000</ns1:Cat>
+                        <ns1:SubCat>6003</ns1:SubCat>
+                        <ns1:AvailBal>0.00</ns1:AvailBal>
+                        <ns1:AdvVal>0.00</ns1:AdvVal>
+                        <ns1:IssueDt>19120023</ns1:IssueDt>
+                        <ns1:Amt>20000.00CR</ns1:Amt>
+                        <ns1:IntRate>8.50</ns1:IntRate>
+                        <ns1:MatDt>08/08/2018</ns1:MatDt>
+                        <ns1:HomeBrchNum>41101</ns1:HomeBrchNum>
+                        <ns1:PrncplAmt>20000.00</ns1:PrncplAmt>
+                        <ns1:TermLgth>65D</ns1:TermLgth>
+                        <ns1:ODInd>N</ns1:ODInd>
+                        <ns1:Brch>SONKHEDA BRANCH</ns1:Brch>
+                        <ns1:AcctName>Mr. Raj Anand Gupta</ns1:AcctName>
+                        <ns1:OpenDt>08082017</ns1:OpenDt>
+                        <ns1:NoCrStat>N</ns1:NoCrStat>
+                        <ns1:NoDrStat>N</ns1:NoDrStat>
+                        <ns1:SAN></ns1:SAN>
+                        <ns1:DelinqStat>00</ns1:DelinqStat>
+                        <ns1:HoldAmt>0.00</ns1:HoldAmt>
+                        <ns1:Mop>SINGLY</ns1:Mop>
+                        <ns1:RdInstl></ns1:RdInstl>
+                        <ns1:NxtInstDt></ns1:NxtInstDt>
+                        <ns1:UnclFunds>0.00</ns1:UnclFunds>
+                        <ns1:SwpBal>0.00</ns1:SwpBal>
+                        <ns1:ODLmt>0.00</ns1:ODLmt>
+                        <ns1:BrchAddr1>Ground Floor, Ward No. 10,</ns1:BrchAddr1>
+                        <ns1:BrchAddr2>Bazaar Mohalla, Village Sonkheda,</ns1:BrchAddr2>
+                        <ns1:BrchAddr3>Tehsil Itarsi, Sonkheda</ns1:BrchAddr3>
+                        <ns1:brchPstCode>461111</ns1:brchPstCode>
+                        <ns1:brchIFSCCode>IDFB0041101</ns1:brchIFSCCode>
+                        <ns1:SrcAccNum>10000693726</ns1:SrcAccNum>
+                        <ns1:ModSweepFlag>N</ns1:ModSweepFlag>
+                        <ns1:NomName></ns1:NomName>
+                        <ns1:NomAdd1></ns1:NomAdd1>
+                        <ns1:NomAdd2></ns1:NomAdd2>
+                        <ns1:NomAdd3></ns1:NomAdd3>
+                        <ns1:NomAdd4></ns1:NomAdd4>
+                        <ns1:NomCountryCode></ns1:NomCountryCode>
+                        <ns1:NomStateCode></ns1:NomStateCode>
+                        <ns1:NomCityCode></ns1:NomCityCode>
+                        <ns1:NomDOB>00000000</ns1:NomDOB>
+                        <ns1:GuardianName></ns1:GuardianName>
+                        <ns1:GuardianAdd1></ns1:GuardianAdd1>
+                        <ns1:GuardianAdd2></ns1:GuardianAdd2>
+                        <ns1:GuardianAdd3></ns1:GuardianAdd3>
+                        <ns1:GuardianAdd4></ns1:GuardianAdd4>
+                        <ns1:GuardianRel></ns1:GuardianRel>
+                        <ns1:EffAvailBal>0.00</ns1:EffAvailBal>
+                        <ns1:DisbursementDt></ns1:DisbursementDt>
+                        <ns1:InstlmtAmt></ns1:InstlmtAmt>
+                        <ns1:AmntPayble></ns1:AmntPayble>
+                        <ns1:TtlPd></ns1:TtlPd>
+                        <ns1:LoanDur>0</ns1:LoanDur>
+                        <ns1:LastPmtDt></ns1:LastPmtDt>
+                        <ns1:NxtInstlmntDt></ns1:NxtInstlmntDt>
+                    </ns1:Coll>
+                </ns1:CustLnkdAcctInqData>
+            </CustLnkdAcctInqRs>
+        </ns0:enquireCustomerLinkedAccountsResponse>
+    </S:Body>
+</S:Envelope>
+
+
+### Expected Sample Success JSON Response, OutputType=03
+{
+    "CustLnkdAcctInqResp": {
+        "msgHdr": {
+            "rslt": "OK"
+        },
+        "msgBdy": {
+            "cstNm": "Mr. FIRSTNAME ",
+            "cstTp": "01",
+            "titl": "1",
+            "numOfChqBk": "1",
+            "numOfCrds": "0",
+            "numOfFc": "0000",
+            "cstLmt": "0.00",
+            "ttlBl": "-91148617600199.88",
+            "crrCd": "INR",
+            "usrNm": "0.00  SI",
+            "stmtFrq": "",
+            "cstCrDt": "17102015",
+            "ttlDr": "91148617650744.88",
+            "numOfDrAcct": "1",
+            "ttlCr": "50545.00",
+            "numOfCrAcct": "29",
+            "drBlCTA": "0.00",
+            "numOfCTAAcctDrBal": "0",
+            "crBlCTA": "0.00",
+            "numOfCTAAcctCrBal": "0",
+            "ntWrth": "-91148617600199.00",
+            "ttlAcct": "30",
+            "trdCstTp": "0102",
+            "prmpt": "LO - BO - PVT LTD",
+            "drBl": "0.00",
+            "drlnAcct": "0",
+            "drBlDp": "-91148617650744.88",
+            "drpAcct": "1",
+            "crBlDp": "50545.00",
+            "crDpAcct": "29",
+            "crBlLn": "0.00",
+            "crLnAcct": "0",
+            "inca": "0.00",
+            "emlId": "",
+            "idNum": "0100000102",
+            "prmIdTp": "02",
+            "blckLstd": "N",
+            "tbd": "",
+            "sttCd": "60",
+            "stff": "",
+            "ctyTwn": "THANE",
+            "brchCd": "40101",
+            "cstCt": "I",
+            "cstStt": "A",
+            "relnshpMgr": "",
+            "nm": "",
+            "prpFlg": "",
+            "pnNum": "",
+            "dsbrsmntDt": "",
+            "grdnNm1": "",
+            "grdnAdd5": "",
+            "grdnAdd6": "",
+            "grdnAdd7": "",
+            "grdnAdd8": "",
+            "instlmtAmt": "",
+            "amntPayble": "",
+            "clctn": [{
+                "exstCstId": "",
+                "acctStat": "",
+                "inqOpt": "D",
+                "acctPrdNm": "",
+                "acctCrCd": "",
+                "lnk": "OWN",
+                "ttlBal": "",
+                "acctCrLmt": "0.00",
+                "cat": "",
+                "sbCt": "",
+                "avlBl": "",
+                "advVl": "0.00",
+                "issDt": "20020022",
+                "amt": "10877.00",
+                "intRt": "8.50",
+                "hmBrchNum": "40101",
+                "prncplAmt": "10000.00",
+                "trmLgth": "65D",
+                "oDInd": "N",
+                "brch": "BR_NAME000",
+                "mtDt": "02062018",
+                "acctNm": "Mr. FIRSTNAME 000102  LASTNAME 000102",
+                "opnDt": "02062017",
+                "noCrStt": "N",
+                "noDrStt": "N",
+                "dlnqStt": "00",
+                "hldAmt": "0.00",
+                "swpBl": "0.00",
+                "oDLmt": "0.00",
+                "brchAddr1": "Ground Floor & Mezzanine Floor",
+                "brchAddr2": "Shop No 21, Dosti Imperia Building,",
+                "brchAddr3": "Ghodbunder Road Thane",
+                "unclFnds": "0.00",
+                "brchPstCode": "400610",
+                "effAvlBl": "10214.00-CR",
+                "san": "",
+                "mop": "",
+                "rdInstl": "",
+                "nxtInstDt": "",
+                "brchIFSCCode": "",
+                "srcAccNum": "",
+                "ModSweepFlag": "",
+                "dsbrsmntDt": "",
+                "instlmtAmt": "",
+                "amntPybl": "",
+                "ttlPd": "",
+                "lnDr": "",
+                "lstPmtDt": "",
+                "nxtInstlmntDt": "",
+                "nmnDtls": {
+                    "nmNm": "",
+                    "nmAdd1": "",
+                    "nmAdd2": "",
+                    "nmAdd3": "",
+                    "nmAdd4": "",
+                    "nmCntryCd": "",
+                    "nmSttCd": "",
+                    "nmCtyCd": "",
+                    "nmDOB": ""
+                },
+                "grdnDtls": {
+                    "grdnNm": "",
+                    "grdnAdd1": "",
+                    "grdnAdd2": "",
+                    "grdnAdd3": "",
+                    "grdnAdd4": "",
+                    "grdnRl": ""
+                }
+            }],
+            "cntctDtls": {
+                "addr": {
+                    "drFltNum": "",
+                    "bldgSoc": "",
+                    "stNm": "",
+                    "lclAddr": "",
+                    "pstCd": ""
+                },
+                "phnHm": "",
+                "fxNum": "",
+                "cntryOfRs": "",
+                "phnBss": "",
+                "mobNum": "919664047670",
+                "ntlCd": "IN"
+            }
+        }
+    }
+}
+
+
+### Expected Sample Error XML Response, OutputType=01
+?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope
+    xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+    <S:Body>
+        <ns0:enquireCustomerLinkedAccountsResponse
+            xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"
+            xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema">
+            <CustLnkdAcctInqRs>
+                <ns1:RsHeader>
+                    <ns1:Filler1>0</ns1:Filler1>
+                    <ns1:MsgLen>0</ns1:MsgLen>
+                    <ns1:Filler2>00</ns1:Filler2>
+                    <ns1:MsgTyp>0</ns1:MsgTyp>
+                    <ns1:Filler3>811</ns1:Filler3>
+                    <ns1:CycNum>0</ns1:CycNum>
+                    <ns1:MsgNum>0</ns1:MsgNum>
+                    <ns1:SegNum>0</ns1:SegNum>
+                    <ns1:FrntEndNum>0</ns1:FrntEndNum>
+                    <ns1:TermlNum>5057</ns1:TermlNum>
+                    <ns1:InstNum>3</ns1:InstNum>
+                    <ns1:BrchNum>41101</ns1:BrchNum>
+                    <ns1:WorkstationNum>57</ns1:WorkstationNum>
+                    <ns1:TellerNum>9903</ns1:TellerNum>
+                    <ns1:TrnNum>060450</ns1:TrnNum>
+                    <ns1:JrnlNum>909068</ns1:JrnlNum>
+                    <ns1:RsHdrDt>0000</ns1:RsHdrDt>
+                    <ns1:Filler4>4</ns1:Filler4>
+                    <ns1:Filler5>5</ns1:Filler5>
+                    <ns1:Filler6>90</ns1:Filler6>
+                    <ns1:Flag1>0</ns1:Flag1>
+                    <ns1:Flag2>2</ns1:Flag2>
+                    <ns1:Flag3>0</ns1:Flag3>
+                    <ns1:Flag4>0</ns1:Flag4>
+                    <ns1:Filler9>  00000000        000000000000000000000000000000                                   0000</ns1:Filler9>
+                    <ns1:OutputType>01</ns1:OutputType>
+                </ns1:RsHeader>
+                <ns1:Stat>
+                    <ns1:ErrorMessage>
+                        <ns1:SupOverRide>0</ns1:SupOverRide>
+                        <ns1:ErrorCode>169</ns1:ErrorCode>
+                        <ns1:ErrorMessage>INVALID CHECK DIGIT</ns1:ErrorMessage>
+                    </ns1:ErrorMessage>
+                </ns1:Stat>
+            </CustLnkdAcctInqRs>
+        </ns0:enquireCustomerLinkedAccountsResponse>
+    </S:Body>
+</S:Envelope>
+
+## Expected Error JSON output, outputType=01
+{
+    CustLnkdAcctInqResp: {
+       msgHdr: {
+          rslt: "Error",
+          "error": [{
+            "cd": "169",
+            "rsn": "INVALID CHECK DIGIT",
+            "srvc": "kong Service"
+            }]
+        },
+        "msgBdy": {}
+    }
+}
+
+
+
+### XSLT to handle both success and error msg of both 
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"
+                xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema"
+                xmlns:fn="http://www.w3.org/2005/xpath-functions"
+                exclude-result-prefixes="S ns0 ns1 fn">
+    
+    <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>
+    
+    <xsl:template match="/">
+        <!-- Extract key values -->
+        <xsl:variable name="outputType" select="//ns1:RsHeader/ns1:OutputType"/>
+        <xsl:variable name="custData" select="//ns1:CustLnkdAcctInqData"/>
+        <xsl:variable name="rsHeader" select="//ns1:RsHeader"/>
+        <xsl:variable name="errorData" select="//ns1:Stat/ns1:ErrorMessage"/>
+        
+        <!-- Create JSON structure based on OutputType -->
+        <xsl:variable name="json-xml">
+            <fn:map>
+                <fn:map key="CustLnkdAcctInqResp">
+                    <!-- Message Header - Success/Error based on OutputType -->
+                    <fn:map key="msgHdr">
+                        <xsl:choose>
+                            <xsl:when test="$outputType = '03'">
+                                <fn:string key="rslt">OK</fn:string>
+                            </xsl:when>
+                            <xsl:when test="$outputType = '01'">
+                                <fn:string key="rslt">Error</fn:string>
+                                <fn:array key="error">
+                                    <fn:map>
+                                        <fn:string key="cd">
+                                            <xsl:value-of select="$errorData/ns1:ErrorCode"/>
+                                        </fn:string>
+                                        <fn:string key="rsn">
+                                            <xsl:value-of select="$errorData/ns1:ErrorMessage"/>
+                                        </fn:string>
+                                        <fn:string key="srvc">kong Service</fn:string>
+                                    </fn:map>
+                                </fn:array>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <fn:string key="rslt">UNKNOWN</fn:string>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </fn:map>
+                    
+                    <!-- Message Body -->
+                    <fn:map key="msgBdy">
+                        <xsl:if test="$outputType = '03' and $custData">
+                            <!-- Customer Information for Success -->
+                            <fn:string key="cstNm">
+                                <xsl:value-of select="$custData/ns1:Name"/>
+                            </fn:string>
+                            <fn:string key="cstTp">
+                                <xsl:value-of select="$custData/ns1:CustTyp"/>
+                            </fn:string>
+                            <fn:string key="titl">
+                                <xsl:value-of select="$custData/ns1:Title"/>
+                            </fn:string>
+                            <fn:string key="numOfChqBk">
+                                <xsl:value-of select="$custData/ns1:NumOfChqBook"/>
+                            </fn:string>
+                            <fn:string key="numOfCrds">
+                                <xsl:value-of select="$custData/ns1:NumOfCards"/>
+                            </fn:string>
+                            <fn:string key="numOfFc">
+                                <xsl:value-of select="$custData/ns1:NumOfFac"/>
+                            </fn:string>
+                            <fn:string key="cstLmt">
+                                <xsl:value-of select="$custData/ns1:CustLmt"/>
+                            </fn:string>
+                            <fn:string key="ttlBl">
+                                <xsl:value-of select="$custData/ns1:TtlBal"/>
+                            </fn:string>
+                            <fn:string key="crrCd">
+                                <xsl:value-of select="$custData/ns1:CurrCode"/>
+                            </fn:string>
+                            <fn:string key="usrNm">
+                                <xsl:value-of select="$custData/ns1:UserName"/>
+                            </fn:string>
+                            <fn:string key="stmtFrq">
+                                <xsl:value-of select="$custData/ns1:StmtFreq"/>
+                            </fn:string>
+                            <fn:string key="cstCrDt">
+                                <xsl:value-of select="$custData/ns1:CustCrDt"/>
+                            </fn:string>
+                            <fn:string key="ttlDr">
+                                <xsl:value-of select="$custData/ns1:TtlDr"/>
+                            </fn:string>
+                            <fn:string key="numOfDrAcct">
+                                <xsl:value-of select="$custData/ns1:NumOfDrAcct"/>
+                            </fn:string>
+                            <fn:string key="ttlCr">
+                                <xsl:value-of select="$custData/ns1:TtlCr"/>
+                            </fn:string>
+                            <fn:string key="numOfCrAcct">
+                                <xsl:value-of select="$custData/ns1:NumOfCrAcct"/>
+                            </fn:string>
+                            <fn:string key="drBlCTA">
+                                <xsl:value-of select="$custData/ns1:DrBalCTA"/>
+                            </fn:string>
+                            <fn:string key="numOfCTAAcctDrBal">
+                                <xsl:value-of select="$custData/ns1:NumOfCTAAcctDrBal"/>
+                            </fn:string>
+                            <fn:string key="crBlCTA">
+                                <xsl:value-of select="$custData/ns1:CrBalCTA"/>
+                            </fn:string>
+                            <fn:string key="numOfCTAAcctCrBal">
+                                <xsl:value-of select="$custData/ns1:NumOfCTAAcctCrBal"/>
+                            </fn:string>
+                            <fn:string key="ntWrth">
+                                <xsl:value-of select="$custData/ns1:NetWrth"/>
+                            </fn:string>
+                            <fn:string key="ttlAcct">
+                                <xsl:value-of select="$custData/ns1:TtlAcct"/>
+                            </fn:string>
+                            <fn:string key="trdCstTp">
+                                <xsl:value-of select="$custData/ns1:TierdCustTyp"/>
+                            </fn:string>
+                            <fn:string key="prmpt">
+                                <xsl:value-of select="$custData/ns1:Prmpt"/>
+                            </fn:string>
+                            <fn:string key="drBl">
+                                <xsl:value-of select="$custData/ns1:DrBal"/>
+                            </fn:string>
+                            <fn:string key="drlnAcct">
+                                <xsl:value-of select="$custData/ns1:DrloanAcct"/>
+                            </fn:string>
+                            <fn:string key="drBlDp">
+                                <xsl:value-of select="$custData/ns1:DrBalDep"/>
+                            </fn:string>
+                            <fn:string key="drpAcct">
+                                <xsl:value-of select="$custData/ns1:DrepAcct"/>
+                            </fn:string>
+                            <fn:string key="crBlDp">
+                                <xsl:value-of select="$custData/ns1:CrBalDep"/>
+                            </fn:string>
+                            <fn:string key="crDpAcct">
+                                <xsl:value-of select="$custData/ns1:CrDepAcct"/>
+                            </fn:string>
+                            <fn:string key="crBlLn">
+                                <xsl:value-of select="$custData/ns1:CrBalLoan"/>
+                            </fn:string>
+                            <fn:string key="crLnAcct">
+                                <xsl:value-of select="$custData/ns1:CrLoanAcct"/>
+                            </fn:string>
+                            <fn:string key="inca">
+                                <xsl:value-of select="$custData/ns1:INCA"/>
+                            </fn:string>
+                            <fn:string key="emlId">
+                                <xsl:value-of select="$custData/ns1:Email"/>
+                            </fn:string>
+                            <fn:string key="idNum">
+                                <xsl:value-of select="$custData/ns1:IdNum"/>
+                            </fn:string>
+                            <fn:string key="prmIdTp">
+                                <xsl:value-of select="$custData/ns1:PrimIdTyp"/>
+                            </fn:string>
+                            <fn:string key="blckLstd">
+                                <xsl:value-of select="$custData/ns1:BlackListed"/>
+                            </fn:string>
+                            <fn:string key="tbd">
+                                <xsl:value-of select="$custData/ns1:Tbd"/>
+                            </fn:string>
+                            <fn:string key="sttCd">
+                                <xsl:value-of select="$custData/ns1:StateCode"/>
+                            </fn:string>
+                            <fn:string key="stff">
+                                <xsl:value-of select="$custData/ns1:Staff"/>
+                            </fn:string>
+                            <fn:string key="ctyTwn">
+                                <xsl:value-of select="$custData/ns1:CityTown"/>
+                            </fn:string>
+                            <fn:string key="brchCd">
+                                <xsl:value-of select="$custData/ns1:BrchCode"/>
+                            </fn:string>
+                            <fn:string key="cstCt">
+                                <xsl:value-of select="$custData/ns1:CustCat"/>
+                            </fn:string>
+                            <fn:string key="cstStt">
+                                <xsl:value-of select="$custData/ns1:CustStat"/>
+                            </fn:string>
+                            <fn:string key="relnshpMgr">
+                                <xsl:value-of select="$custData/ns1:RelnshpMgr"/>
+                            </fn:string>
+                            <fn:string key="prpFlg">
+                                <xsl:value-of select="$custData/ns1:PropFlag"/>
+                            </fn:string>
+                            <fn:string key="pnNum">
+                                <xsl:value-of select="$custData/ns1:PanNum"/>
+                            </fn:string>
+                            <fn:string key="dsbrsmntDt">
+                                <xsl:value-of select="$custData/ns1:DisbursementDt"/>
+                            </fn:string>
+                            <fn:string key="grdnNm1">
+                                <xsl:value-of select="$custData/ns1:GuardianName1"/>
+                            </fn:string>
+                            <fn:string key="grdnAdd5">
+                                <xsl:value-of select="$custData/ns1:GuardianAdd5"/>
+                            </fn:string>
+                            <fn:string key="grdnAdd6">
+                                <xsl:value-of select="$custData/ns1:GuardianAdd6"/>
+                            </fn:string>
+                            <fn:string key="grdnAdd7">
+                                <xsl:value-of select="$custData/ns1:GuardianAdd7"/>
+                            </fn:string>
+                            <fn:string key="grdnAdd8">
+                                <xsl:value-of select="$custData/ns1:GuardianAdd8"/>
+                            </fn:string>
+                            <fn:string key="instlmtAmt">
+                                <xsl:value-of select="$custData/ns1:InstlmtAmt"/>
+                            </fn:string>
+                            <fn:string key="amntPayble">
+                                <xsl:value-of select="$custData/ns1:AmntPayble"/>
+                            </fn:string>
+                            
+                            <!-- Collections Array -->
+                            <xsl:if test="$custData/ns1:Coll">
+                                <fn:array key="clctn">
+                                    <xsl:for-each select="$custData/ns1:Coll">
+                                        <fn:map>
+                                            <fn:string key="exstCstId">
+                                                <xsl:value-of select="ns1:ExistCustId"/>
+                                            </fn:string>
+                                            <fn:string key="acctStat">
+                                                <xsl:value-of select="ns1:AcctStat"/>
+                                            </fn:string>
+                                            <fn:string key="inqOpt">
+                                                <xsl:value-of select="ns1:InqOpt"/>
+                                            </fn:string>
+                                            <fn:string key="acctPrdNm">
+                                                <xsl:value-of select="ns1:AcctProdName"/>
+                                            </fn:string>
+                                            <fn:string key="acctCrCd">
+                                                <xsl:value-of select="ns1:AcctCurCode"/>
+                                            </fn:string>
+                                            <fn:string key="lnk">
+                                                <xsl:value-of select="ns1:Link"/>
+                                            </fn:string>
+                                            <fn:string key="ttlBal">
+                                                <xsl:value-of select="ns1:TtlBal"/>
+                                            </fn:string>
+                                            <fn:string key="acctCrLmt">
+                                                <xsl:value-of select="ns1:AcctCrLmt"/>
+                                            </fn:string>
+                                            <fn:string key="cat">
+                                                <xsl:value-of select="ns1:Cat"/>
+                                            </fn:string>
+                                            <fn:string key="sbCt">
+                                                <xsl:value-of select="ns1:SubCat"/>
+                                            </fn:string>
+                                            <fn:string key="avlBl">
+                                                <xsl:value-of select="ns1:AvailBal"/>
+                                            </fn:string>
+                                            <fn:string key="advVl">
+                                                <xsl:value-of select="ns1:AdvVal"/>
+                                            </fn:string>
+                                            <fn:string key="issDt">
+                                                <xsl:value-of select="ns1:IssueDt"/>
+                                            </fn:string>
+                                            <fn:string key="amt">
+                                                <xsl:value-of select="ns1:Amt"/>
+                                            </fn:string>
+                                            <fn:string key="intRt">
+                                                <xsl:value-of select="ns1:IntRate"/>
+                                            </fn:string>
+                                            <fn:string key="mtDt">
+                                                <xsl:value-of select="ns1:MatDt"/>
+                                            </fn:string>
+                                            <fn:string key="hmBrchNum">
+                                                <xsl:value-of select="ns1:HomeBrchNum"/>
+                                            </fn:string>
+                                            <fn:string key="prncplAmt">
+                                                <xsl:value-of select="ns1:PrncplAmt"/>
+                                            </fn:string>
+                                            <fn:string key="trmLgth">
+                                                <xsl:value-of select="ns1:TermLgth"/>
+                                            </fn:string>
+                                            <fn:string key="oDInd">
+                                                <xsl:value-of select="ns1:ODInd"/>
+                                            </fn:string>
+                                            <fn:string key="brch">
+                                                <xsl:value-of select="ns1:Brch"/>
+                                            </fn:string>
+                                            <fn:string key="acctNm">
+                                                <xsl:value-of select="ns1:AcctName"/>
+                                            </fn:string>
+                                            <fn:string key="opnDt">
+                                                <xsl:value-of select="ns1:OpenDt"/>
+                                            </fn:string>
+                                            <fn:string key="noCrStt">
+                                                <xsl:value-of select="ns1:NoCrStat"/>
+                                            </fn:string>
+                                            <fn:string key="noDrStt">
+                                                <xsl:value-of select="ns1:NoDrStat"/>
+                                            </fn:string>
+                                            <fn:string key="san">
+                                                <xsl:value-of select="ns1:SAN"/>
+                                            </fn:string>
+                                            <fn:string key="dlnqStt">
+                                                <xsl:value-of select="ns1:DelinqStat"/>
+                                            </fn:string>
+                                            <fn:string key="hldAmt">
+                                                <xsl:value-of select="ns1:HoldAmt"/>
+                                            </fn:string>
+                                            <fn:string key="mop">
+                                                <xsl:value-of select="ns1:Mop"/>
+                                            </fn:string>
+                                            <fn:string key="rdInstl">
+                                                <xsl:value-of select="ns1:RdInstl"/>
+                                            </fn:string>
+                                            <fn:string key="nxtInstDt">
+                                                <xsl:value-of select="ns1:NxtInstDt"/>
+                                            </fn:string>
+                                            <fn:string key="unclFnds">
+                                                <xsl:value-of select="ns1:UnclFunds"/>
+                                            </fn:string>
+                                            <fn:string key="swpBl">
+                                                <xsl:value-of select="ns1:SwpBal"/>
+                                            </fn:string>
+                                            <fn:string key="oDLmt">
+                                                <xsl:value-of select="ns1:ODLmt"/>
+                                            </fn:string>
+                                            <fn:string key="brchAddr1">
+                                                <xsl:value-of select="ns1:BrchAddr1"/>
+                                            </fn:string>
+                                            <fn:string key="brchAddr2">
+                                                <xsl:value-of select="ns1:BrchAddr2"/>
+                                            </fn:string>
+                                            <fn:string key="brchAddr3">
+                                                <xsl:value-of select="ns1:BrchAddr3"/>
+                                            </fn:string>
+                                            <fn:string key="brchPstCode">
+                                                <xsl:value-of select="ns1:brchPstCode"/>
+                                            </fn:string>
+                                            <fn:string key="brchIFSCCode">
+                                                <xsl:value-of select="ns1:brchIFSCCode"/>
+                                            </fn:string>
+                                            <fn:string key="srcAccNum">
+                                                <xsl:value-of select="ns1:SrcAccNum"/>
+                                            </fn:string>
+                                            <fn:string key="ModSweepFlag">
+                                                <xsl:value-of select="ns1:ModSweepFlag"/>
+                                            </fn:string>
+                                            <fn:string key="effAvlBl">
+                                                <xsl:value-of select="ns1:EffAvailBal"/>
+                                            </fn:string>
+                                            <fn:string key="dsbrsmntDt">
+                                                <xsl:value-of select="ns1:DisbursementDt"/>
+                                            </fn:string>
+                                            <fn:string key="instlmtAmt">
+                                                <xsl:value-of select="ns1:InstlmtAmt"/>
+                                            </fn:string>
+                                            <fn:string key="amntPybl">
+                                                <xsl:value-of select="ns1:AmntPayble"/>
+                                            </fn:string>
+                                            <fn:string key="ttlPd">
+                                                <xsl:value-of select="ns1:TtlPd"/>
+                                            </fn:string>
+                                            <fn:string key="lnDr">
+                                                <xsl:value-of select="ns1:LoanDur"/>
+                                            </fn:string>
+                                            <fn:string key="lstPmtDt">
+                                                <xsl:value-of select="ns1:LastPmtDt"/>
+                                            </fn:string>
+                                            <fn:string key="nxtInstlmntDt">
+                                                <xsl:value-of select="ns1:NxtInstlmntDt"/>
+                                            </fn:string>
+                                            
+                                            <!-- Nominee Details -->
+                                            <fn:map key="nmnDtls">
+                                                <fn:string key="nmNm">
+                                                    <xsl:value-of select="ns1:NomName"/>
+                                                </fn:string>
+                                                <fn:string key="nmAdd1">
+                                                    <xsl:value-of select="ns1:NomAdd1"/>
+                                                </fn:string>
+                                                <fn:string key="nmAdd2">
+                                                    <xsl:value-of select="ns1:NomAdd2"/>
+                                                </fn:string>
+                                                <fn:string key="nmAdd3">
+                                                    <xsl:value-of select="ns1:NomAdd3"/>
+                                                </fn:string>
+                                                <fn:string key="nmAdd4">
+                                                    <xsl:value-of select="ns1:NomAdd4"/>
+                                                </fn:string>
+                                                <fn:string key="nmCntryCd">
+                                                    <xsl:value-of select="ns1:NomCountryCode"/>
+                                                </fn:string>
+                                                <fn:string key="nmSttCd">
+                                                    <xsl:value-of select="ns1:NomStateCode"/>
+                                                </fn:string>
+                                                <fn:string key="nmCtyCd">
+                                                    <xsl:value-of select="ns1:NomCityCode"/>
+                                                </fn:string>
+                                                <fn:string key="nmDOB">
+                                                    <xsl:value-of select="ns1:NomDOB"/>
+                                                </fn:string>
+                                            </fn:map>
+                                            
+                                            <!-- Guardian Details -->
+                                            <fn:map key="grdnDtls">
+                                                <fn:string key="grdnNm">
+                                                    <xsl:value-of select="ns1:GuardianName"/>
+                                                </fn:string>
+                                                <fn:string key="grdnAdd1">
+                                                    <xsl:value-of select="ns1:GuardianAdd1"/>
+                                                </fn:string>
+                                                <fn:string key="grdnAdd2">
+                                                    <xsl:value-of select="ns1:GuardianAdd2"/>
+                                                </fn:string>
+                                                <fn:string key="grdnAdd3">
+                                                    <xsl:value-of select="ns1:GuardianAdd3"/>
+                                                </fn:string>
+                                                <fn:string key="grdnAdd4">
+                                                    <xsl:value-of select="ns1:GuardianAdd4"/>
+                                                </fn:string>
+                                                <fn:string key="grdnRl">
+                                                    <xsl:value-of select="ns1:GuardianRel"/>
+                                                </fn:string>
+                                            </fn:map>
+                                        </fn:map>
+                                    </xsl:for-each>
+                                </fn:array>
+                            </xsl:if>
+                            
+                            <!-- Contact Details -->
+                            <fn:map key="cntctDtls">
+                                <fn:map key="addr">
+                                    <fn:string key="drFltNum">
+                                        <xsl:value-of select="$custData/ns1:DoorFlatNum"/>
+                                    </fn:string>
+                                    <fn:string key="bldgSoc">
+                                        <xsl:value-of select="$custData/ns1:BldgSoc"/>
+                                    </fn:string>
+                                    <fn:string key="stNm">
+                                        <xsl:value-of select="$custData/ns1:StName"/>
+                                    </fn:string>
+                                    <fn:string key="lclAddr">
+                                        <xsl:value-of select="$custData/ns1:LocalAddr"/>
+                                    </fn:string>
+                                    <fn:string key="pstCd">
+                                        <xsl:value-of select="$custData/ns1:PstCode"/>
+                                    </fn:string>
+                                </fn:map>
+                                <fn:string key="phnHm">
+                                    <xsl:value-of select="$custData/ns1:PhnHome"/>
+                                </fn:string>
+                                <fn:string key="fxNum">
+                                    <xsl:value-of select="$custData/ns1:FaxNum"/>
+                                </fn:string>
+                                <fn:string key="cntryOfRs">
+                                    <xsl:value-of select="$custData/ns1:CountryOfRes"/>
+                                </fn:string>
+                                <fn:string key="phnBss">
+                                    <xsl:value-of select="$custData/ns1:PhnBuss"/>
+                                </fn:string>
+                                <fn:string key="mobNum">
+                                    <xsl:value-of select="$custData/ns1:MobileNum"/>
+                                </fn:string>
+                                <fn:string key="ntlCd">
+                                    <xsl:value-of select="$custData/ns1:NatlCode"/>
+                                </fn:string>
+                            </fn:map>
+                        </xsl:if>
+                    </fn:map>
+                </fn:map>
+            </fn:map>
+        </xsl:variable>
+        
+        <xsl:value-of select="fn:xml-to-json($json-xml)"/>
+    </xsl:template>
+    
+</xsl:stylesheet>
+
+
+
+### ### test with simple xml, backend service echoed xml request. 
+curl --location 'http://localhost:3002/soap-service' \
+--header 'Content-Type: application/xml' \
+--data '<test>simple</test>'
+
+
+### Test with SOAP XML - Success Response when OutputType=03 , service name - xml-request-mock-service
+ curl --location 'http://localhost:9000/xml-json-response-error-handle-03/soap-service' \
+--header 'Content-Type: application/xml' \
+--data '<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+    <S:Body>
+        <ns0:enquireCustomerLinkedAccountsResponse
+            xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"
+            xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema">
+            <CustLnkdAcctInqRs>
+                <ns1:RsHeader>
+                    <ns1:Filler1>0</ns1:Filler1>
+                    <ns1:MsgLen>0</ns1:MsgLen>
+                    <ns1:Filler2>00</ns1:Filler2>
+                    <ns1:MsgTyp>0</ns1:MsgTyp>
+                    <ns1:Filler3>1194</ns1:Filler3>
+                    <ns1:CycNum>0</ns1:CycNum>
+                    <ns1:MsgNum>0</ns1:MsgNum>
+                    <ns1:SegNum>0</ns1:SegNum>
+                    <ns1:FrntEndNum>0</ns1:FrntEndNum>
+                    <ns1:TermlNum>5057</ns1:TermlNum>
+                    <ns1:InstNum>3</ns1:InstNum>
+                    <ns1:BrchNum>41101</ns1:BrchNum>
+                    <ns1:WorkstationNum>57</ns1:WorkstationNum>
+                    <ns1:TellerNum>9903</ns1:TellerNum>
+                    <ns1:TrnNum>060450</ns1:TrnNum>
+                    <ns1:JrnlNum>908657</ns1:JrnlNum>
+                    <ns1:RsHdrDt>0000</ns1:RsHdrDt>
+                    <ns1:Filler4>4</ns1:Filler4>
+                    <ns1:Filler5>5</ns1:Filler5>
+                    <ns1:Filler6>90</ns1:Filler6>
+                    <ns1:Flag1>0</ns1:Flag1>
+                    <ns1:Flag2>0</ns1:Flag2>
+                    <ns1:Flag3>0</ns1:Flag3>
+                    <ns1:Flag4>0</ns1:Flag4>
+                    <ns1:Filler9>  00000000        000000000000000000000000000000                                   0000</ns1:Filler9>
+                    <ns1:OutputType>03</ns1:OutputType>
+                </ns1:RsHeader>
+                <ns1:CustLnkdAcctInqData>
+                    <ns1:CustNum>1015867163</ns1:CustNum>
+                    <ns1:CustTyp>01</ns1:CustTyp>
+                    <ns1:RelnshpMgr>0</ns1:RelnshpMgr>
+                    <ns1:Title>1</ns1:Title>
+                    <ns1:Name>Mr. Raj Anand Gupta</ns1:Name>
+                    <ns1:DoorFlatNum>ADD1001848</ns1:DoorFlatNum>
+                    <ns1:BldgSoc>ADD2001848</ns1:BldgSoc>
+                    <ns1:StName>ADD3001848</ns1:StName>
+                    <ns1:LocalAddr>NORTH GOA                          N</ns1:LocalAddr>
+                    <ns1:PstCode>513745</ns1:PstCode>
+                    <ns1:PhnHome>918108712546</ns1:PhnHome>
+                    <ns1:FaxNum></ns1:FaxNum>
+                    <ns1:CountryOfRes>IN</ns1:CountryOfRes>
+                    <ns1:PhnBuss></ns1:PhnBuss>
+                    <ns1:MobileNum></ns1:MobileNum>
+                    <ns1:NatlCode>IN</ns1:NatlCode>
+                    <ns1:NumOfChqBook>01</ns1:NumOfChqBook>
+                    <ns1:NumOfCards>00</ns1:NumOfCards>
+                    <ns1:NumOfFac>0000</ns1:NumOfFac>
+                    <ns1:CustLmt>0.00</ns1:CustLmt>
+                    <ns1:TtlBal>53782.00</ns1:TtlBal>
+                    <ns1:CurrCode>INR</ns1:CurrCode>
+                    <ns1:UserName>00</ns1:UserName>
+                    <ns1:StmtFreq></ns1:StmtFreq>
+                    <ns1:CustCrDt>17042017</ns1:CustCrDt>
+                    <ns1:TtlDr>0.00</ns1:TtlDr>
+                    <ns1:NumOfDrAcct>0</ns1:NumOfDrAcct>
+                    <ns1:TtlCr>53782.00</ns1:TtlCr>
+                    <ns1:NumOfCrAcct>314</ns1:NumOfCrAcct>
+                    <ns1:DrBalCTA>0.00</ns1:DrBalCTA>
+                    <ns1:NumOfCTAAcctDrBal>0</ns1:NumOfCTAAcctDrBal>
+                    <ns1:CrBalCTA>0.00</ns1:CrBalCTA>
+                    <ns1:NumOfCTAAcctCrBal>0</ns1:NumOfCTAAcctCrBal>
+                    <ns1:NetWrth>53782.00</ns1:NetWrth>
+                    <ns1:TtlAcct>314</ns1:TtlAcct>
+                    <ns1:TierdCustTyp>0169</ns1:TierdCustTyp>
+                    <ns1:Prmpt>INDIVIDUAL-SUPER SEN</ns1:Prmpt>
+                    <ns1:DrBal>0.00</ns1:DrBal>
+                    <ns1:DrloanAcct>0</ns1:DrloanAcct>
+                    <ns1:DrBalDep>0.00</ns1:DrBalDep>
+                    <ns1:DrepAcct>0</ns1:DrepAcct>
+                    <ns1:CrBalDep>53782.00</ns1:CrBalDep>
+                    <ns1:CrDepAcct>314</ns1:CrDepAcct>
+                    <ns1:CrBalLoan>0.00</ns1:CrBalLoan>
+                    <ns1:CrLoanAcct>0</ns1:CrLoanAcct>
+                    <ns1:INCA>0.00</ns1:INCA>
+                    <ns1:Email>raj1@yahoo.co.in</ns1:Email>
+                    <ns1:IdNum>WCURL7413O       SS</ns1:IdNum>
+                    <ns1:PrimIdTyp>07</ns1:PrimIdTyp>
+                    <ns1:BlackListed>N</ns1:BlackListed>
+                    <ns1:Tbd></ns1:Tbd>
+                    <ns1:StateCode>68</ns1:StateCode>
+                    <ns1:Staff>SS</ns1:Staff>
+                    <ns1:CityTown>NORTH GOA</ns1:CityTown>
+                    <ns1:BrchCode>41101</ns1:BrchCode>
+                    <ns1:CustCat>I</ns1:CustCat>
+                    <ns1:CustStat>A</ns1:CustStat>
+                    <ns1:PropFlag>N</ns1:PropFlag>
+                    <ns1:PanNum>WCURL7413O</ns1:PanNum>
+                    <ns1:GuardianName1></ns1:GuardianName1>
+                    <ns1:GuardianAdd5></ns1:GuardianAdd5>
+                    <ns1:GuardianAdd6></ns1:GuardianAdd6>
+                    <ns1:GuardianAdd7></ns1:GuardianAdd7>
+                    <ns1:GuardianAdd8></ns1:GuardianAdd8>
+                    <ns1:DisbursementDt>00000000</ns1:DisbursementDt>
+                    <ns1:InstlmtAmt>000000000</ns1:InstlmtAmt>
+                    <ns1:AmntPayble>0.00</ns1:AmntPayble>
+                    <ns1:Coll>
+                        <ns1:ExistCustId>10000821749</ns1:ExistCustId>
+                        <ns1:AcctStat>CLOS</ns1:AcctStat>
+                        <ns1:InqOpt>D</ns1:InqOpt>
+                        <ns1:AcctProdName>Short Term Deposit - Senior</ns1:AcctProdName>
+                        <ns1:AcctCurCode>INR</ns1:AcctCurCode>
+                        <ns1:Link>OWN</ns1:Link>
+                        <ns1:TtlBal>0.00</ns1:TtlBal>
+                        <ns1:AcctCrLmt>0.00</ns1:AcctCrLmt>
+                        <ns1:Cat>3000</ns1:Cat>
+                        <ns1:SubCat>6029</ns1:SubCat>
+                        <ns1:AvailBal>0.00</ns1:AvailBal>
+                        <ns1:AdvVal>0.00</ns1:AdvVal>
+                        <ns1:IssueDt>19120023</ns1:IssueDt>
+                        <ns1:Amt>10382.00CR</ns1:Amt>
+                        <ns1:IntRate>7.75</ns1:IntRate>
+                        <ns1:MatDt>04/02/2018</ns1:MatDt>
+                        <ns1:HomeBrchNum>41101</ns1:HomeBrchNum>
+                        <ns1:PrncplAmt>10000.00</ns1:PrncplAmt>
+                        <ns1:TermLgth>80D</ns1:TermLgth>
+                        <ns1:ODInd>N</ns1:ODInd>
+                        <ns1:Brch>SONKHEDA BRANCH</ns1:Brch>
+                        <ns1:AcctName>Mr. Raj Anand Gupta</ns1:AcctName>
+                        <ns1:OpenDt>08082017</ns1:OpenDt>
+                        <ns1:NoCrStat>N</ns1:NoCrStat>
+                        <ns1:NoDrStat>N</ns1:NoDrStat>
+                        <ns1:SAN></ns1:SAN>
+                        <ns1:DelinqStat>00</ns1:DelinqStat>
+                        <ns1:HoldAmt>0.00</ns1:HoldAmt>
+                        <ns1:Mop>SINGLY</ns1:Mop>
+                        <ns1:RdInstl></ns1:RdInstl>
+                        <ns1:NxtInstDt></ns1:NxtInstDt>
+                        <ns1:UnclFunds>0.00</ns1:UnclFunds>
+                        <ns1:SwpBal>0.00</ns1:SwpBal>
+                        <ns1:ODLmt>0.00</ns1:ODLmt>
+                        <ns1:BrchAddr1>Ground Floor, Ward No. 10,</ns1:BrchAddr1>
+                        <ns1:BrchAddr2>Bazaar Mohalla, Village Sonkheda,</ns1:BrchAddr2>
+                        <ns1:BrchAddr3>Tehsil Itarsi, Sonkheda</ns1:BrchAddr3>
+                        <ns1:brchPstCode>461111</ns1:brchPstCode>
+                        <ns1:brchIFSCCode>IDFB0041101</ns1:brchIFSCCode>
+                        <ns1:SrcAccNum>10000693726</ns1:SrcAccNum>
+                        <ns1:ModSweepFlag>N</ns1:ModSweepFlag>
+                        <ns1:NomName></ns1:NomName>
+                        <ns1:NomAdd1></ns1:NomAdd1>
+                        <ns1:NomAdd2></ns1:NomAdd2>
+                        <ns1:NomAdd3></ns1:NomAdd3>
+                        <ns1:NomAdd4></ns1:NomAdd4>
+                        <ns1:NomCountryCode></ns1:NomCountryCode>
+                        <ns1:NomStateCode></ns1:NomStateCode>
+                        <ns1:NomCityCode></ns1:NomCityCode>
+                        <ns1:NomDOB>00000000</ns1:NomDOB>
+                        <ns1:GuardianName></ns1:GuardianName>
+                        <ns1:GuardianAdd1></ns1:GuardianAdd1>
+                        <ns1:GuardianAdd2></ns1:GuardianAdd2>
+                        <ns1:GuardianAdd3></ns1:GuardianAdd3>
+                        <ns1:GuardianAdd4></ns1:GuardianAdd4>
+                        <ns1:GuardianRel></ns1:GuardianRel>
+                        <ns1:EffAvailBal>0.00</ns1:EffAvailBal>
+                        <ns1:DisbursementDt></ns1:DisbursementDt>
+                        <ns1:InstlmtAmt></ns1:InstlmtAmt>
+                        <ns1:AmntPayble></ns1:AmntPayble>
+                        <ns1:TtlPd></ns1:TtlPd>
+                        <ns1:LoanDur>0</ns1:LoanDur>
+                        <ns1:LastPmtDt></ns1:LastPmtDt>
+                        <ns1:NxtInstlmntDt></ns1:NxtInstlmntDt>
+                    </ns1:Coll>
+                </ns1:CustLnkdAcctInqData>
+            </CustLnkdAcctInqRs>
+        </ns0:enquireCustomerLinkedAccountsResponse>
+    </S:Body>
+</S:Envelope>'
+
+
+### curl Output 
+
+{
+  "CustLnkdAcctInqResp": {
+    "msgHdr": {
+      "rslt": "OK"
+    },
+    "msgBdy": {
+      "cstNm": "Mr. Raj Anand Gupta",
+      "cstTp": "01",
+      "titl": "1",
+      "numOfChqBk": "01",
+      "numOfCrds": "00",
+      "numOfFc": "0000",
+      "cstLmt": "0.00",
+      "ttlBl": "53782.00",
+      "crrCd": "INR",
+      "usrNm": "00",
+      "stmtFrq": "",
+      "cstCrDt": "17042017",
+      "ttlDr": "0.00",
+      "numOfDrAcct": "0",
+      "ttlCr": "53782.00",
+      "numOfCrAcct": "314",
+      "drBlCTA": "0.00",
+      "numOfCTAAcctDrBal": "0",
+      "crBlCTA": "0.00",
+      "numOfCTAAcctCrBal": "0",
+      "ntWrth": "53782.00",
+      "ttlAcct": "314",
+      "trdCstTp": "0169",
+      "prmpt": "INDIVIDUAL-SUPER SEN",
+      "drBl": "0.00",
+      "drlnAcct": "0",
+      "drBlDp": "0.00",
+      "drpAcct": "0",
+      "crBlDp": "53782.00",
+      "crDpAcct": "314",
+      "crBlLn": "0.00",
+      "crLnAcct": "0",
+      "inca": "0.00",
+      "emlId": "raj1@yahoo.co.in",
+      "idNum": "WCURL7413O SS",
+      "prmIdTp": "07",
+      "blckLstd": "N",
+      "tbd": "",
+      "sttCd": "68",
+      "stff": "SS",
+      "ctyTwn": "NORTH GOA",
+      "brchCd": "41101",
+      "cstCt": "I",
+      "cstStt": "A",
+      "relnshpMgr": "0",
+      "prpFlg": "N",
+      "pnNum": "WCURL7413O",
+      "dsbrsmntDt": "00000000",
+      "grdnNm1": "",
+      "grdnAdd5": "",
+      "grdnAdd6": "",
+      "grdnAdd7": "",
+      "grdnAdd8": "",
+      "instlmtAmt": "000000000",
+      "amntPayble": "0.00",
+      "clctn": [
+        {
+          "exstCstId": "10000821749",
+          "acctStat": "CLOS",
+          "inqOpt": "D",
+          "acctPrdNm": "Short Term Deposit - Senior",
+          "acctCrCd": "INR",
+          "lnk": "OWN",
+          "ttlBal": "0.00",
+          "acctCrLmt": "0.00",
+          "cat": "3000",
+          "sbCt": "6029",
+          "avlBl": "0.00",
+          "advVl": "0.00",
+          "issDt": "19120023",
+          "amt": "10382.00CR",
+          "intRt": "7.75",
+          "mtDt": "04/02/2018",
+          "hmBrchNum": "41101",
+          "prncplAmt": "10000.00",
+          "trmLgth": "80D",
+          "oDInd": "N",
+          "brch": "SONKHEDA BRANCH",
+          "acctNm": "Mr. Raj Anand Gupta",
+          "opnDt": "08082017",
+          "noCrStt": "N",
+          "noDrStt": "N",
+          "san": "",
+          "dlnqStt": "00",
+          "hldAmt": "0.00",
+          "mop": "SINGLY",
+          "rdInstl": "",
+          "nxtInstDt": "",
+          "unclFnds": "0.00",
+          "swpBl": "0.00",
+          "oDLmt": "0.00",
+          "brchAddr1": "Ground Floor, Ward No. 10,",
+          "brchAddr2": "Bazaar Mohalla, Village Sonkheda,",
+          "brchAddr3": "Tehsil Itarsi, Sonkheda",
+          "brchPstCode": "461111",
+          "brchIFSCCode": "IDFB0041101",
+          "srcAccNum": "10000693726",
+          "ModSweepFlag": "N",
+          "effAvlBl": "0.00",
+          "dsbrsmntDt": "",
+          "instlmtAmt": "",
+          "amntPybl": "",
+          "ttlPd": "",
+          "lnDr": "0",
+          "lstPmtDt": "",
+          "nxtInstlmntDt": "",
+          "nmnDtls": {
+            "nmNm": "",
+            "nmAdd1": "",
+            "nmAdd2": "",
+            "nmAdd3": "",
+            "nmAdd4": "",
+            "nmCntryCd": "",
+            "nmSttCd": "",
+            "nmCtyCd": "",
+            "nmDOB": "00000000"
+          },
+          "grdnDtls": {
+            "grdnNm": "",
+            "grdnAdd1": "",
+            "grdnAdd2": "",
+            "grdnAdd3": "",
+            "grdnAdd4": "",
+            "grdnRl": ""
+          }
+        }
+      ],
+      "cntctDtls": {
+        "addr": {
+          "drFltNum": "ADD1001848",
+          "bldgSoc": "ADD2001848",
+          "stNm": "ADD3001848",
+          "lclAddr": "NORTH GOA N",
+          "pstCd": "513745"
+        },
+        "phnHm": "918108712546",
+        "fxNum": "",
+        "cntryOfRs": "IN",
+        "phnBss": "",
+        "mobNum": "",
+        "ntlCd": "IN"
+      }
+    }
+  }
+}
+
+
+### Test with SOAP XML - Error Response - OutputType=01 - service name xml-request-mock-service
+ curl --location 'http://localhost:9000/xml-json-response-error-handle-03/soap-service' \
+--header 'Content-Type: application/xml' \
+--data '<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope
+    xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+    <S:Body>
+        <ns0:enquireCustomerLinkedAccountsResponse
+            xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"
+            xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema">
+            <CustLnkdAcctInqRs>
+                <ns1:RsHeader>
+                    <ns1:Filler1>0</ns1:Filler1>
+                    <ns1:MsgLen>0</ns1:MsgLen>
+                    <ns1:Filler2>00</ns1:Filler2>
+                    <ns1:MsgTyp>0</ns1:MsgTyp>
+                    <ns1:Filler3>811</ns1:Filler3>
+                    <ns1:CycNum>0</ns1:CycNum>
+                    <ns1:MsgNum>0</ns1:MsgNum>
+                    <ns1:SegNum>0</ns1:SegNum>
+                    <ns1:FrntEndNum>0</ns1:FrntEndNum>
+                    <ns1:TermlNum>5057</ns1:TermlNum>
+                    <ns1:InstNum>3</ns1:InstNum>
+                    <ns1:BrchNum>41101</ns1:BrchNum>
+                    <ns1:WorkstationNum>57</ns1:WorkstationNum>
+                    <ns1:TellerNum>9903</ns1:TellerNum>
+                    <ns1:TrnNum>060450</ns1:TrnNum>
+                    <ns1:JrnlNum>909068</ns1:JrnlNum>
+                    <ns1:RsHdrDt>0000</ns1:RsHdrDt>
+                    <ns1:Filler4>4</ns1:Filler4>
+                    <ns1:Filler5>5</ns1:Filler5>
+                    <ns1:Filler6>90</ns1:Filler6>
+                    <ns1:Flag1>0</ns1:Flag1>
+                    <ns1:Flag2>2</ns1:Flag2>
+                    <ns1:Flag3>0</ns1:Flag3>
+                    <ns1:Flag4>0</ns1:Flag4>
+                    <ns1:Filler9>  00000000        000000000000000000000000000000                                   0000</ns1:Filler9>
+                    <ns1:OutputType>01</ns1:OutputType>
+                </ns1:RsHeader>
+                <ns1:Stat>
+                    <ns1:ErrorMessage>
+                        <ns1:SupOverRide>0</ns1:SupOverRide>
+                        <ns1:ErrorCode>169</ns1:ErrorCode>
+                        <ns1:ErrorMessage>INVALID CHECK DIGIT</ns1:ErrorMessage>
+                    </ns1:ErrorMessage>
+                </ns1:Stat>
+            </CustLnkdAcctInqRs>
+        </ns0:enquireCustomerLinkedAccountsResponse>
+    </S:Body>
+</S:Envelope>'
+
+### Curl output
+
+{
+  "CustLnkdAcctInqResp": {
+    "msgHdr": {
+      "rslt": "Error",
+      "error": [
+        {
+          "cd": "169",
+          "rsn": "INVALID CHECK DIGIT",
+          "srvc": "kong Service"
+        }
+      ]
+    },
+    "msgBdy": {}
+  }
+}

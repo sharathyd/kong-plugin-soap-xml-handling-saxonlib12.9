@@ -1,0 +1,905 @@
+_format_version: "3.0"
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: host.docker.internal
+  name: json-xml-mock-service
+  port: 3002
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: json-xml-request-03
+    path_handling: v0
+    paths:
+    - /json-xml-request-03
+    plugins:
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        RouteXPathRegisterNs:
+        - soap,http://schemas.xmlsoap.org/soap/envelope/
+        RouteXPathTargets: null
+        SOAPAction_Header: "no"
+        VerboseRequest: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: null
+        xsltTransformBefore: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"     xmlns:fn="http://www.w3.org/2005/xpath-functions"     xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"     xmlns:v1="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"     xmlns:ban="http://TCS.BANCS.Adapter/BANCSSchema"     exclude-result-prefixes="fn">      <xsl:output
+          method="xml" indent="yes" encoding="UTF-8"/>     <xsl:strip-space elements="*"/>      <!--
+          Main template that processes JSON input -->     <xsl:template match="/">         <!--
+          Convert JSON string to XML -->         <xsl:variable name="json-xml" select="json-to-xml(.)"/>                  <soapenv:Envelope>             <soapenv:Header/>             <soapenv:Body>                 <v1:enquireCustomerLinkedAccounts>                     <CustLnkdAcctInqRq>                         <xsl:apply-templates
+          select="$json-xml//fn:map[@key='CustLnkdAcctInqReq']"/>                     </CustLnkdAcctInqRq>                 </v1:enquireCustomerLinkedAccounts>             </soapenv:Body>         </soapenv:Envelope>     </xsl:template>      <!--
+          Process the main CustLnkdAcctInqReq structure -->     <xsl:template match="fn:map[@key='CustLnkdAcctInqReq']">         <!--
+          Extract variables for easier access -->         <xsl:variable name="msgHdr"
+          select="fn:map[@key='msgHdr']"/>         <xsl:variable name="msgBdy" select="fn:map[@key='msgBdy']"/>         <xsl:variable
+          name="hdrProp" select="$msgHdr/fn:map[@key='hdrFlds']/fn:array[@key='hdrProp']"/>                  <!--
+          Create RqHeader -->         <ban:RqHeader>             <ban:Filler1></ban:Filler1>             <ban:MsgLen></ban:MsgLen>             <ban:Filler2></ban:Filler2>             <ban:MsgTyp></ban:MsgTyp>             <ban:Filler3></ban:Filler3>             <ban:CycNum></ban:CycNum>             <ban:MsgNum></ban:MsgNum>             <ban:SegNum></ban:SegNum>             <ban:SegNum2></ban:SegNum2>             <ban:FrontEndNum></ban:FrontEndNum>             <ban:TermlNum></ban:TermlNum>             <ban:InstNum>003</ban:InstNum>                          <!--
+          Extract BRANCHID from hdrProp array -->             <ban:BrchNum>                 <xsl:value-of
+          select="$hdrProp/fn:map[fn:string[@key='nm']='BRANCHID']/fn:string[@key='vl']"/>             </ban:BrchNum>                          <ban:WorkstationNum></ban:WorkstationNum>                          <!--
+          Extract TELLERID from hdrProp array -->             <ban:TellerNum>                 <xsl:value-of
+          select="$hdrProp/fn:map[fn:string[@key='nm']='TELLERID']/fn:string[@key='vl']"/>             </ban:TellerNum>                          <ban:TranNum></ban:TranNum>             <ban:JrnlNum></ban:JrnlNum>             <ban:HdrDt></ban:HdrDt>             <ban:Filler4></ban:Filler4>             <ban:Filler5></ban:Filler5>             <ban:Filler6></ban:Filler6>             <ban:Flag1></ban:Flag1>             <ban:Flag2></ban:Flag2>             <ban:Flag3></ban:Flag3>             <ban:Flag4>W</ban:Flag4>             <ban:Flag5>Y</ban:Flag5>             <ban:Flag6></ban:Flag6>             <ban:Flag7></ban:Flag7>             <ban:SprvsrID></ban:SprvsrID>             <ban:SupDate></ban:SupDate>             <ban:CheckerID1></ban:CheckerID1>             <ban:ParentBlinkJrnlNum></ban:ParentBlinkJrnlNum>             <ban:CheckerID2></ban:CheckerID2>             <ban:BlinkJrnlNum></ban:BlinkJrnlNum>             <ban:UUIDSource></ban:UUIDSource>             <ban:UUIDNUM></ban:UUIDNUM>             <ban:UUIDSeqNo></ban:UUIDSeqNo>         </ban:RqHeader>          <!--
+          Create Data section -->         <ban:Data>             <ban:ExistCustAcctNum>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='exstCstAcctNm']"/>             </ban:ExistCustAcctNum>             <ban:ExistIdNum>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='exstIdNum']"/>             </ban:ExistIdNum>             <ban:IdTyp>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='idTyp']"/>             </ban:IdTyp>             <ban:CustAcctFlag>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='cstAcctFlg']"/>             </ban:CustAcctFlag>             <ban:AcctType>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='acctTp']"/>             </ban:AcctType>             <ban:AcctStat>                 <xsl:value-of
+          select="$msgBdy/fn:string[@key='acctStt']"/>             </ban:AcctStat>         </ban:Data>     </xsl:template>  </xsl:stylesheet>
+      enabled: true
+      instance_name: soap-xml-request-handling-03
+      name: soap-xml-request-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  - https_redirect_status_code: 426
+    name: json-xml-request-end2end-02
+    path_handling: v0
+    paths:
+    - /json-xml-request-end2end-02
+    plugins:
+    - config:
+        access: []
+        body_filter:
+        - |-
+          -- If not replacing, let the body go normally
+          if not ngx.ctx.replace_error_body then
+            return
+          end
+
+          kong.log.notice("body_filter: replacing body")
+
+          -- Output our custom body
+          ngx.arg[1] = ngx.ctx.new_body
+          ngx.arg[2] = true  -- end of body
+        certificate: []
+        header_filter:
+        - |
+          -- Check status
+          local status = kong.response.get_status()
+          kong.log.notice("header_filter: status = ", status)
+
+          if status == 500 then
+            -- Mark flag in NGINX ctx (shared per-request)
+            ngx.ctx.replace_error_body = true
+
+            -- Prepare new body (store in ctx)
+            ngx.ctx.new_body = [[
+          <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+              <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+                <ns2:Ack>false</ns2:Ack>
+              </ns2:NotificationResponse>
+            </SOAP-ENV:Body>
+          </SOAP-ENV:Envelope>
+          ]]
+
+            -- Modify headers here (ONLY here)
+            kong.response.set_status(200)
+            kong.response.set_header("Content-Type", "text/xml")
+            kong.response.set_header("Content-Length", tostring(#ngx.ctx.new_body))
+          end
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      instance_name: post-function-02
+      name: post-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        RouteXPathRegisterNs:
+        - soap,http://schemas.xmlsoap.org/soap/envelope/
+        RouteXPathTargets: null
+        SOAPAction_Header: "no"
+        VerboseRequest: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: null
+        xsltTransformBefore: '<?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="fn">          <xsl:output
+          method="xml" indent="yes" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Parse JSON to XML using json-to-xml function -->         <xsl:variable
+          name="json-xml" select="json-to-xml(string(.))"/>                  <!--
+          Extract the full request value -->         <xsl:variable name="full-request"
+          select="$json-xml//fn:map[@key=''serviceCall'']/fn:string[@key=''request'']"/>                  <!--
+          Split the pipe-separated values -->         <xsl:variable name="fields"
+          select="tokenize($full-request, ''\|'')"/>                  <!-- Extract
+          only the needed fields: 1,2,3,4,5,6, and last field -->         <xsl:variable
+          name="mapped-request">             <xsl:choose>                 <xsl:when
+          test="count($fields) >= 6">                     <!-- Fields 1-6 and last
+          field -->                     <xsl:value-of select="$fields[1]"/>|<xsl:value-of
+          select="$fields[2]"/>|<xsl:value-of select="$fields[3]"/>|<xsl:value-of
+          select="$fields[4]"/>|<xsl:value-of select="$fields[5]"/>|<xsl:value-of
+          select="$fields[6]"/>|<xsl:value-of select="$fields[last()]"/>                 </xsl:when>                 <xsl:otherwise>                     <!--
+          Fallback: return original if not enough fields -->                     <xsl:value-of
+          select="$full-request"/>                 </xsl:otherwise>             </xsl:choose>         </xsl:variable>                  <!--
+          Generate SOAP envelope -->         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">             <soap:Body>                 <ServiceCall
+          xmlns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">                     <Request>                         <xsl:value-of
+          select="$mapped-request"/>                     </Request>                 </ServiceCall>             </soap:Body>         </soap:Envelope>     </xsl:template>  </xsl:stylesheet>'
+      enabled: true
+      instance_name: soap-xml-request-handling-02
+      name: soap-xml-request-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        VerboseResponse: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:temp="http://tempuri.org/"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="soap
+          temp fn">          <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Extract the Request value (not ServiceCallResult)
+          -->         <xsl:variable name="result" select="//temp:ServiceCall/temp:Request/text()"/>                  <!--
+          Create JSON structure using xml-to-json -->         <xsl:variable name="json-xml">             <fn:map
+          xmlns:fn="http://www.w3.org/2005/xpath-functions">                 <fn:map
+          key="serviceCallResponse">                     <fn:string key="serviceCallResult">                         <xsl:value-of
+          select="$result"/>                     </fn:string>                 </fn:map>             </fn:map>         </xsl:variable>                  <xsl:value-of
+          select="fn:xml-to-json($json-xml)"/>     </xsl:template>      </xsl:stylesheet>
+        xsltTransformBefore: null
+      enabled: true
+      instance_name: soap-xml-response-handling-02
+      name: soap-xml-response-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  - https_redirect_status_code: 426
+    name: xml-json-response-error-handle-03
+    path_handling: v0
+    paths:
+    - /xml-json-response-error-handle-03
+    plugins:
+    - config:
+        access: []
+        body_filter:
+        - |-
+          -- If not replacing, let the body go normally
+          if not ngx.ctx.replace_error_body then
+            return
+          end
+
+          kong.log.notice("body_filter: replacing body with custom error message")
+
+          -- Output our custom body
+          ngx.arg[1] = ngx.ctx.new_body
+          ngx.arg[2] = true  -- end of body
+        certificate: []
+        header_filter:
+        - |-
+          -- Check status
+          local status = kong.response.get_status()
+          kong.log.notice("Status code = ", status)
+
+          if status == 500 then
+            -- Mark flag in NGINX ctx (shared per-request)
+            ngx.ctx.replace_error_body = true
+
+            -- Prepare new body (store in ctx)
+            ngx.ctx.new_body = [[
+          {
+            "CustLnkdAcctInqResp": {
+              "msgHdr": {
+                "rslt": "Error",
+                "error": [
+                  {
+                    "cd": "170",
+                    "rsn": "GENERAL ERROR",
+                    "srvc": "kong Service"
+                  }
+                ]
+              },
+              "msgBdy": {}
+            }
+          }
+          ]]
+
+            -- Modify headers here (ONLY here)
+            kong.response.set_status(200)
+            kong.response.set_header("Content-Type", "text/xml")
+            kong.response.set_header("Content-Length", tostring(#ngx.ctx.new_body))
+            kong.log.err("Status = ", status , " Found an error, showing error message = ", ngx.ctx.new_body)
+          end
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      instance_name: post-function-03
+      name: post-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        VerboseResponse: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"                 xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"                 xmlns:ns0="http://BaNCS.TCS.com/webservice/EnquireCustomerLinkedAccountsInterface/v1"                 xmlns:ns1="http://TCS.BANCS.Adapter/BANCSSchema"                 xmlns:fn="http://www.w3.org/2005/xpath-functions"                 exclude-result-prefixes="S
+          ns0 ns1 fn">          <xsl:output method="text" indent="no" omit-xml-declaration="yes"/>          <xsl:template
+          match="/">         <!-- Extract key values -->         <xsl:variable name="outputType"
+          select="//ns1:RsHeader/ns1:OutputType"/>         <xsl:variable name="custData"
+          select="//ns1:CustLnkdAcctInqData"/>         <xsl:variable name="rsHeader"
+          select="//ns1:RsHeader"/>         <xsl:variable name="errorData" select="//ns1:Stat/ns1:ErrorMessage"/>                  <!--
+          Create JSON structure based on OutputType -->         <xsl:variable name="json-xml">             <fn:map>                 <fn:map
+          key="CustLnkdAcctInqResp">                     <!-- Message Header - Success/Error
+          based on OutputType -->                     <fn:map key="msgHdr">                         <xsl:choose>                             <xsl:when
+          test="$outputType = '03'">                                 <fn:string key="rslt">OK</fn:string>                             </xsl:when>                             <xsl:when
+          test="$outputType = '01'">                                 <fn:string key="rslt">Error</fn:string>                                 <fn:array
+          key="error">                                     <fn:map>                                         <fn:string
+          key="cd">                                             <xsl:value-of select="$errorData/ns1:ErrorCode"/>                                         </fn:string>                                         <fn:string
+          key="rsn">                                             <xsl:value-of select="$errorData/ns1:ErrorMessage"/>                                         </fn:string>                                         <fn:string
+          key="srvc">kong Service</fn:string>                                     </fn:map>                                 </fn:array>                             </xsl:when>                             <xsl:otherwise>                                 <fn:string
+          key="rslt">UNKNOWN</fn:string>                             </xsl:otherwise>                         </xsl:choose>                     </fn:map>                                          <!--
+          Message Body -->                     <fn:map key="msgBdy">                         <xsl:if
+          test="$outputType = '03' and $custData">                             <!--
+          Customer Information for Success -->                             <fn:string
+          key="cstNm">                                 <xsl:value-of select="$custData/ns1:Name"/>                             </fn:string>                             <fn:string
+          key="cstTp">                                 <xsl:value-of select="$custData/ns1:CustTyp"/>                             </fn:string>                             <fn:string
+          key="titl">                                 <xsl:value-of select="$custData/ns1:Title"/>                             </fn:string>                             <fn:string
+          key="numOfChqBk">                                 <xsl:value-of select="$custData/ns1:NumOfChqBook"/>                             </fn:string>                             <fn:string
+          key="numOfCrds">                                 <xsl:value-of select="$custData/ns1:NumOfCards"/>                             </fn:string>                             <fn:string
+          key="numOfFc">                                 <xsl:value-of select="$custData/ns1:NumOfFac"/>                             </fn:string>                             <fn:string
+          key="cstLmt">                                 <xsl:value-of select="$custData/ns1:CustLmt"/>                             </fn:string>                             <fn:string
+          key="ttlBl">                                 <xsl:value-of select="$custData/ns1:TtlBal"/>                             </fn:string>                             <fn:string
+          key="crrCd">                                 <xsl:value-of select="$custData/ns1:CurrCode"/>                             </fn:string>                             <fn:string
+          key="usrNm">                                 <xsl:value-of select="$custData/ns1:UserName"/>                             </fn:string>                             <fn:string
+          key="stmtFrq">                                 <xsl:value-of select="$custData/ns1:StmtFreq"/>                             </fn:string>                             <fn:string
+          key="cstCrDt">                                 <xsl:value-of select="$custData/ns1:CustCrDt"/>                             </fn:string>                             <fn:string
+          key="ttlDr">                                 <xsl:value-of select="$custData/ns1:TtlDr"/>                             </fn:string>                             <fn:string
+          key="numOfDrAcct">                                 <xsl:value-of select="$custData/ns1:NumOfDrAcct"/>                             </fn:string>                             <fn:string
+          key="ttlCr">                                 <xsl:value-of select="$custData/ns1:TtlCr"/>                             </fn:string>                             <fn:string
+          key="numOfCrAcct">                                 <xsl:value-of select="$custData/ns1:NumOfCrAcct"/>                             </fn:string>                             <fn:string
+          key="drBlCTA">                                 <xsl:value-of select="$custData/ns1:DrBalCTA"/>                             </fn:string>                             <fn:string
+          key="numOfCTAAcctDrBal">                                 <xsl:value-of select="$custData/ns1:NumOfCTAAcctDrBal"/>                             </fn:string>                             <fn:string
+          key="crBlCTA">                                 <xsl:value-of select="$custData/ns1:CrBalCTA"/>                             </fn:string>                             <fn:string
+          key="numOfCTAAcctCrBal">                                 <xsl:value-of select="$custData/ns1:NumOfCTAAcctCrBal"/>                             </fn:string>                             <fn:string
+          key="ntWrth">                                 <xsl:value-of select="$custData/ns1:NetWrth"/>                             </fn:string>                             <fn:string
+          key="ttlAcct">                                 <xsl:value-of select="$custData/ns1:TtlAcct"/>                             </fn:string>                             <fn:string
+          key="trdCstTp">                                 <xsl:value-of select="$custData/ns1:TierdCustTyp"/>                             </fn:string>                             <fn:string
+          key="prmpt">                                 <xsl:value-of select="$custData/ns1:Prmpt"/>                             </fn:string>                             <fn:string
+          key="drBl">                                 <xsl:value-of select="$custData/ns1:DrBal"/>                             </fn:string>                             <fn:string
+          key="drlnAcct">                                 <xsl:value-of select="$custData/ns1:DrloanAcct"/>                             </fn:string>                             <fn:string
+          key="drBlDp">                                 <xsl:value-of select="$custData/ns1:DrBalDep"/>                             </fn:string>                             <fn:string
+          key="drpAcct">                                 <xsl:value-of select="$custData/ns1:DrepAcct"/>                             </fn:string>                             <fn:string
+          key="crBlDp">                                 <xsl:value-of select="$custData/ns1:CrBalDep"/>                             </fn:string>                             <fn:string
+          key="crDpAcct">                                 <xsl:value-of select="$custData/ns1:CrDepAcct"/>                             </fn:string>                             <fn:string
+          key="crBlLn">                                 <xsl:value-of select="$custData/ns1:CrBalLoan"/>                             </fn:string>                             <fn:string
+          key="crLnAcct">                                 <xsl:value-of select="$custData/ns1:CrLoanAcct"/>                             </fn:string>                             <fn:string
+          key="inca">                                 <xsl:value-of select="$custData/ns1:INCA"/>                             </fn:string>                             <fn:string
+          key="emlId">                                 <xsl:value-of select="$custData/ns1:Email"/>                             </fn:string>                             <fn:string
+          key="idNum">                                 <xsl:value-of select="$custData/ns1:IdNum"/>                             </fn:string>                             <fn:string
+          key="prmIdTp">                                 <xsl:value-of select="$custData/ns1:PrimIdTyp"/>                             </fn:string>                             <fn:string
+          key="blckLstd">                                 <xsl:value-of select="$custData/ns1:BlackListed"/>                             </fn:string>                             <fn:string
+          key="tbd">                                 <xsl:value-of select="$custData/ns1:Tbd"/>                             </fn:string>                             <fn:string
+          key="sttCd">                                 <xsl:value-of select="$custData/ns1:StateCode"/>                             </fn:string>                             <fn:string
+          key="stff">                                 <xsl:value-of select="$custData/ns1:Staff"/>                             </fn:string>                             <fn:string
+          key="ctyTwn">                                 <xsl:value-of select="$custData/ns1:CityTown"/>                             </fn:string>                             <fn:string
+          key="brchCd">                                 <xsl:value-of select="$custData/ns1:BrchCode"/>                             </fn:string>                             <fn:string
+          key="cstCt">                                 <xsl:value-of select="$custData/ns1:CustCat"/>                             </fn:string>                             <fn:string
+          key="cstStt">                                 <xsl:value-of select="$custData/ns1:CustStat"/>                             </fn:string>                             <fn:string
+          key="relnshpMgr">                                 <xsl:value-of select="$custData/ns1:RelnshpMgr"/>                             </fn:string>                             <fn:string
+          key="prpFlg">                                 <xsl:value-of select="$custData/ns1:PropFlag"/>                             </fn:string>                             <fn:string
+          key="pnNum">                                 <xsl:value-of select="$custData/ns1:PanNum"/>                             </fn:string>                             <fn:string
+          key="dsbrsmntDt">                                 <xsl:value-of select="$custData/ns1:DisbursementDt"/>                             </fn:string>                             <fn:string
+          key="grdnNm1">                                 <xsl:value-of select="$custData/ns1:GuardianName1"/>                             </fn:string>                             <fn:string
+          key="grdnAdd5">                                 <xsl:value-of select="$custData/ns1:GuardianAdd5"/>                             </fn:string>                             <fn:string
+          key="grdnAdd6">                                 <xsl:value-of select="$custData/ns1:GuardianAdd6"/>                             </fn:string>                             <fn:string
+          key="grdnAdd7">                                 <xsl:value-of select="$custData/ns1:GuardianAdd7"/>                             </fn:string>                             <fn:string
+          key="grdnAdd8">                                 <xsl:value-of select="$custData/ns1:GuardianAdd8"/>                             </fn:string>                             <fn:string
+          key="instlmtAmt">                                 <xsl:value-of select="$custData/ns1:InstlmtAmt"/>                             </fn:string>                             <fn:string
+          key="amntPayble">                                 <xsl:value-of select="$custData/ns1:AmntPayble"/>                             </fn:string>                                                          <!--
+          Collections Array -->                             <xsl:if test="$custData/ns1:Coll">                                 <fn:array
+          key="clctn">                                     <xsl:for-each select="$custData/ns1:Coll">                                         <fn:map>                                             <fn:string
+          key="exstCstId">                                                 <xsl:value-of
+          select="ns1:ExistCustId"/>                                             </fn:string>                                             <fn:string
+          key="acctStat">                                                 <xsl:value-of
+          select="ns1:AcctStat"/>                                             </fn:string>                                             <fn:string
+          key="inqOpt">                                                 <xsl:value-of
+          select="ns1:InqOpt"/>                                             </fn:string>                                             <fn:string
+          key="acctPrdNm">                                                 <xsl:value-of
+          select="ns1:AcctProdName"/>                                             </fn:string>                                             <fn:string
+          key="acctCrCd">                                                 <xsl:value-of
+          select="ns1:AcctCurCode"/>                                             </fn:string>                                             <fn:string
+          key="lnk">                                                 <xsl:value-of
+          select="ns1:Link"/>                                             </fn:string>                                             <fn:string
+          key="ttlBal">                                                 <xsl:value-of
+          select="ns1:TtlBal"/>                                             </fn:string>                                             <fn:string
+          key="acctCrLmt">                                                 <xsl:value-of
+          select="ns1:AcctCrLmt"/>                                             </fn:string>                                             <fn:string
+          key="cat">                                                 <xsl:value-of
+          select="ns1:Cat"/>                                             </fn:string>                                             <fn:string
+          key="sbCt">                                                 <xsl:value-of
+          select="ns1:SubCat"/>                                             </fn:string>                                             <fn:string
+          key="avlBl">                                                 <xsl:value-of
+          select="ns1:AvailBal"/>                                             </fn:string>                                             <fn:string
+          key="advVl">                                                 <xsl:value-of
+          select="ns1:AdvVal"/>                                             </fn:string>                                             <fn:string
+          key="issDt">                                                 <xsl:value-of
+          select="ns1:IssueDt"/>                                             </fn:string>                                             <fn:string
+          key="amt">                                                 <xsl:value-of
+          select="ns1:Amt"/>                                             </fn:string>                                             <fn:string
+          key="intRt">                                                 <xsl:value-of
+          select="ns1:IntRate"/>                                             </fn:string>                                             <fn:string
+          key="mtDt">                                                 <xsl:value-of
+          select="ns1:MatDt"/>                                             </fn:string>                                             <fn:string
+          key="hmBrchNum">                                                 <xsl:value-of
+          select="ns1:HomeBrchNum"/>                                             </fn:string>                                             <fn:string
+          key="prncplAmt">                                                 <xsl:value-of
+          select="ns1:PrncplAmt"/>                                             </fn:string>                                             <fn:string
+          key="trmLgth">                                                 <xsl:value-of
+          select="ns1:TermLgth"/>                                             </fn:string>                                             <fn:string
+          key="oDInd">                                                 <xsl:value-of
+          select="ns1:ODInd"/>                                             </fn:string>                                             <fn:string
+          key="brch">                                                 <xsl:value-of
+          select="ns1:Brch"/>                                             </fn:string>                                             <fn:string
+          key="acctNm">                                                 <xsl:value-of
+          select="ns1:AcctName"/>                                             </fn:string>                                             <fn:string
+          key="opnDt">                                                 <xsl:value-of
+          select="ns1:OpenDt"/>                                             </fn:string>                                             <fn:string
+          key="noCrStt">                                                 <xsl:value-of
+          select="ns1:NoCrStat"/>                                             </fn:string>                                             <fn:string
+          key="noDrStt">                                                 <xsl:value-of
+          select="ns1:NoDrStat"/>                                             </fn:string>                                             <fn:string
+          key="san">                                                 <xsl:value-of
+          select="ns1:SAN"/>                                             </fn:string>                                             <fn:string
+          key="dlnqStt">                                                 <xsl:value-of
+          select="ns1:DelinqStat"/>                                             </fn:string>                                             <fn:string
+          key="hldAmt">                                                 <xsl:value-of
+          select="ns1:HoldAmt"/>                                             </fn:string>                                             <fn:string
+          key="mop">                                                 <xsl:value-of
+          select="ns1:Mop"/>                                             </fn:string>                                             <fn:string
+          key="rdInstl">                                                 <xsl:value-of
+          select="ns1:RdInstl"/>                                             </fn:string>                                             <fn:string
+          key="nxtInstDt">                                                 <xsl:value-of
+          select="ns1:NxtInstDt"/>                                             </fn:string>                                             <fn:string
+          key="unclFnds">                                                 <xsl:value-of
+          select="ns1:UnclFunds"/>                                             </fn:string>                                             <fn:string
+          key="swpBl">                                                 <xsl:value-of
+          select="ns1:SwpBal"/>                                             </fn:string>                                             <fn:string
+          key="oDLmt">                                                 <xsl:value-of
+          select="ns1:ODLmt"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr1">                                                 <xsl:value-of
+          select="ns1:BrchAddr1"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr2">                                                 <xsl:value-of
+          select="ns1:BrchAddr2"/>                                             </fn:string>                                             <fn:string
+          key="brchAddr3">                                                 <xsl:value-of
+          select="ns1:BrchAddr3"/>                                             </fn:string>                                             <fn:string
+          key="brchPstCode">                                                 <xsl:value-of
+          select="ns1:brchPstCode"/>                                             </fn:string>                                             <fn:string
+          key="brchIFSCCode">                                                 <xsl:value-of
+          select="ns1:brchIFSCCode"/>                                             </fn:string>                                             <fn:string
+          key="srcAccNum">                                                 <xsl:value-of
+          select="ns1:SrcAccNum"/>                                             </fn:string>                                             <fn:string
+          key="ModSweepFlag">                                                 <xsl:value-of
+          select="ns1:ModSweepFlag"/>                                             </fn:string>                                             <fn:string
+          key="effAvlBl">                                                 <xsl:value-of
+          select="ns1:EffAvailBal"/>                                             </fn:string>                                             <fn:string
+          key="dsbrsmntDt">                                                 <xsl:value-of
+          select="ns1:DisbursementDt"/>                                             </fn:string>                                             <fn:string
+          key="instlmtAmt">                                                 <xsl:value-of
+          select="ns1:InstlmtAmt"/>                                             </fn:string>                                             <fn:string
+          key="amntPybl">                                                 <xsl:value-of
+          select="ns1:AmntPayble"/>                                             </fn:string>                                             <fn:string
+          key="ttlPd">                                                 <xsl:value-of
+          select="ns1:TtlPd"/>                                             </fn:string>                                             <fn:string
+          key="lnDr">                                                 <xsl:value-of
+          select="ns1:LoanDur"/>                                             </fn:string>                                             <fn:string
+          key="lstPmtDt">                                                 <xsl:value-of
+          select="ns1:LastPmtDt"/>                                             </fn:string>                                             <fn:string
+          key="nxtInstlmntDt">                                                 <xsl:value-of
+          select="ns1:NxtInstlmntDt"/>                                             </fn:string>                                                                                          <!--
+          Nominee Details -->                                             <fn:map
+          key="nmnDtls">                                                 <fn:string
+          key="nmNm">                                                     <xsl:value-of
+          select="ns1:NomName"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd1">                                                     <xsl:value-of
+          select="ns1:NomAdd1"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd2">                                                     <xsl:value-of
+          select="ns1:NomAdd2"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd3">                                                     <xsl:value-of
+          select="ns1:NomAdd3"/>                                                 </fn:string>                                                 <fn:string
+          key="nmAdd4">                                                     <xsl:value-of
+          select="ns1:NomAdd4"/>                                                 </fn:string>                                                 <fn:string
+          key="nmCntryCd">                                                     <xsl:value-of
+          select="ns1:NomCountryCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmSttCd">                                                     <xsl:value-of
+          select="ns1:NomStateCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmCtyCd">                                                     <xsl:value-of
+          select="ns1:NomCityCode"/>                                                 </fn:string>                                                 <fn:string
+          key="nmDOB">                                                     <xsl:value-of
+          select="ns1:NomDOB"/>                                                 </fn:string>                                             </fn:map>                                                                                          <!--
+          Guardian Details -->                                             <fn:map
+          key="grdnDtls">                                                 <fn:string
+          key="grdnNm">                                                     <xsl:value-of
+          select="ns1:GuardianName"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd1">                                                     <xsl:value-of
+          select="ns1:GuardianAdd1"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd2">                                                     <xsl:value-of
+          select="ns1:GuardianAdd2"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd3">                                                     <xsl:value-of
+          select="ns1:GuardianAdd3"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnAdd4">                                                     <xsl:value-of
+          select="ns1:GuardianAdd4"/>                                                 </fn:string>                                                 <fn:string
+          key="grdnRl">                                                     <xsl:value-of
+          select="ns1:GuardianRel"/>                                                 </fn:string>                                             </fn:map>                                         </fn:map>                                     </xsl:for-each>                                 </fn:array>                             </xsl:if>                                                          <!--
+          Contact Details -->                             <fn:map key="cntctDtls">                                 <fn:map
+          key="addr">                                     <fn:string key="drFltNum">                                         <xsl:value-of
+          select="$custData/ns1:DoorFlatNum"/>                                     </fn:string>                                     <fn:string
+          key="bldgSoc">                                         <xsl:value-of select="$custData/ns1:BldgSoc"/>                                     </fn:string>                                     <fn:string
+          key="stNm">                                         <xsl:value-of select="$custData/ns1:StName"/>                                     </fn:string>                                     <fn:string
+          key="lclAddr">                                         <xsl:value-of select="$custData/ns1:LocalAddr"/>                                     </fn:string>                                     <fn:string
+          key="pstCd">                                         <xsl:value-of select="$custData/ns1:PstCode"/>                                     </fn:string>                                 </fn:map>                                 <fn:string
+          key="phnHm">                                     <xsl:value-of select="$custData/ns1:PhnHome"/>                                 </fn:string>                                 <fn:string
+          key="fxNum">                                     <xsl:value-of select="$custData/ns1:FaxNum"/>                                 </fn:string>                                 <fn:string
+          key="cntryOfRs">                                     <xsl:value-of select="$custData/ns1:CountryOfRes"/>                                 </fn:string>                                 <fn:string
+          key="phnBss">                                     <xsl:value-of select="$custData/ns1:PhnBuss"/>                                 </fn:string>                                 <fn:string
+          key="mobNum">                                     <xsl:value-of select="$custData/ns1:MobileNum"/>                                 </fn:string>                                 <fn:string
+          key="ntlCd">                                     <xsl:value-of select="$custData/ns1:NatlCode"/>                                 </fn:string>                             </fn:map>                         </xsl:if>                     </fn:map>                 </fn:map>             </fn:map>         </xsl:variable>                  <xsl:value-of
+          select="fn:xml-to-json($json-xml)"/>     </xsl:template>      </xsl:stylesheet>
+        xsltTransformBefore: null
+      enabled: true
+      instance_name: soap-xml-response-handling-03
+      name: soap-xml-response-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  tags:
+  - xmljsondemo
+  write_timeout: 60000
+- connect_timeout: 60000
+  enabled: true
+  host: host.docker.internal
+  name: xml-json-mock-service
+  path: /
+  port: 3003
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: json-xml-response-01
+    path_handling: v0
+    paths:
+    - /json-xml-response-01
+    plugins:
+    - config:
+        access: []
+        body_filter:
+        - |-
+          -- If not replacing, let the body go normally
+          if not ngx.ctx.replace_error_body then
+            return
+          end
+
+          kong.log.notice("body_filter: replacing body with custom error message")
+
+          -- Output our custom body
+          ngx.arg[1] = ngx.ctx.new_body
+          ngx.arg[2] = true  -- end of body
+        certificate: []
+        header_filter:
+        - |
+          -- Check status
+          local status = kong.response.get_status()
+          kong.log.notice("Status code = ", status)
+
+          if status ~= 200 then
+            -- Mark flag in NGINX ctx (shared per-request)
+            ngx.ctx.replace_error_body = true
+
+            -- Prepare new body (store in ctx)
+            ngx.ctx.new_body = [[
+          <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+              <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+                <ns2:Ack>false</ns2:Ack>
+              </ns2:NotificationResponse>
+            </SOAP-ENV:Body>
+          </SOAP-ENV:Envelope>
+          ]]
+
+            -- Modify headers here (ONLY here)
+            kong.response.set_status(200)
+            kong.response.set_header("Content-Type", "text/xml")
+            kong.response.set_header("Content-Length", tostring(#ngx.ctx.new_body))
+            kong.log.err("Status = ", status , " Found an error, showing error message = ", ngx.ctx.new_body)
+          end
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      instance_name: post-function-01
+      name: post-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        VerboseResponse: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: null
+        xsltTransformBefore: <?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"     xmlns:fn="http://www.w3.org/2005/xpath-functions"     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"     exclude-result-prefixes="fn">      <xsl:output
+          method="xml" encoding="UTF-8" indent="yes"/>     <xsl:strip-space elements="*"/>      <!--
+          Main template -->     <xsl:template match="/">         <!-- Parse the input
+          JSON -->         <xsl:variable name="json-data" select="json-to-xml(.)"/>                  <!--
+          Create SOAP envelope with SOAP-ENV namespace -->         <SOAP-ENV:Envelope
+          xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">             <SOAP-ENV:Header/>             <SOAP-ENV:Body>                 <!--
+          Process the JSON data dynamically -->                 <xsl:apply-templates
+          select="$json-data" mode="json-to-soap"/>             </SOAP-ENV:Body>         </SOAP-ENV:Envelope>     </xsl:template>      <!--
+          Template to handle JSON map structure -->     <xsl:template match="fn:map"
+          mode="json-to-soap">         <xsl:for-each select="fn:*[@key]">             <xsl:choose>                 <!--
+          Handle NotificationResponse specifically -->                 <xsl:when test="@key
+          = 'NotificationResponse'">                     <ns2:NotificationResponse
+          xmlns:ns2="http://soap.sforce.com/2005/09/outbound">                         <xsl:apply-templates
+          select="." mode="process-content"/>                     </ns2:NotificationResponse>                 </xsl:when>                 <!--
+          Handle other root elements generically -->                 <xsl:otherwise>                     <xsl:element
+          name="ns2:{@key}" namespace="http://soap.sforce.com/2005/09/outbound">                         <xsl:apply-templates
+          select="." mode="process-content"/>                     </xsl:element>                 </xsl:otherwise>             </xsl:choose>         </xsl:for-each>     </xsl:template>      <!--
+          Template to process content of JSON elements -->     <xsl:template match="fn:*"
+          mode="process-content">         <xsl:choose>             <!-- If it's a
+          map, process its children -->             <xsl:when test="self::fn:map">                 <xsl:for-each
+          select="fn:*[@key]">                     <xsl:element name="ns2:{@key}"
+          namespace="http://soap.sforce.com/2005/09/outbound">                         <xsl:apply-templates
+          select="." mode="process-content"/>                     </xsl:element>                 </xsl:for-each>             </xsl:when>             <!--
+          If it's an array, process each item -->             <xsl:when test="self::fn:array">                 <xsl:for-each
+          select="fn:*">                     <xsl:apply-templates select="." mode="process-content"/>                 </xsl:for-each>             </xsl:when>             <!--
+          If it's a string, boolean, or number, output its value -->             <xsl:otherwise>                 <xsl:value-of
+          select="."/>             </xsl:otherwise>         </xsl:choose>     </xsl:template>  </xsl:stylesheet>
+      enabled: true
+      instance_name: soap-xml-response-handling-01
+      name: soap-xml-response-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  - https_redirect_status_code: 426
+    name: xml-json-request-01
+    path_handling: v0
+    paths:
+    - /xml-json-request-01
+    plugins:
+    - config:
+        access: []
+        body_filter:
+        - |-
+          -- If not replacing, let the body go normally
+          if not ngx.ctx.replace_error_body then
+            return
+          end
+
+          kong.log.notice("body_filter: replacing body with custom error message")
+
+          -- Output our custom body
+          ngx.arg[1] = ngx.ctx.new_body
+          ngx.arg[2] = true  -- end of body
+        certificate: []
+        header_filter:
+        - |
+          -- Check status
+          local status = kong.response.get_status()
+          kong.log.notice("Status code = ", status)
+
+          if status ~= 200 then
+            -- Mark flag in NGINX ctx (shared per-request)
+            ngx.ctx.replace_error_body = true
+
+            -- Prepare new body (store in ctx)
+            ngx.ctx.new_body = [[
+          <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            <SOAP-ENV:Header/>
+            <SOAP-ENV:Body>
+              <ns2:NotificationResponse xmlns:ns2="http://soap.sforce.com/2005/09/outbound">
+                <ns2:Ack>false</ns2:Ack>
+              </ns2:NotificationResponse>
+            </SOAP-ENV:Body>
+          </SOAP-ENV:Envelope>
+          ]]
+
+            -- Modify headers here (ONLY here)
+            kong.response.set_status(200)
+            kong.response.set_header("Content-Type", "text/xml")
+            kong.response.set_header("Content-Length", tostring(#ngx.ctx.new_body))
+            kong.log.err("Status = ", status , " Found an error, showing error message = ", ngx.ctx.new_body)
+          end
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      instance_name: post-function-request-scenario-01
+      name: post-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        access:
+        - |-
+          local function inject_header_into_xml_body()
+            -- read header
+            local user_id = kong.request.get_header("x-user-id")
+
+            if not user_id then
+              kong.log.debug("x-user-id header missing; skipping injection.")
+              return
+            end
+
+            -- read original body
+            local body, err = kong.request.get_raw_body()
+            if not body then
+              kong.log.err("Unable to read request body: ", err)
+              return
+            end
+
+            -- inject <UserId> inside <notifications>
+            -- inserting just after opening <notifications> tag
+            local updated_xml = body:gsub(
+              "(<notifications[^>]*>)",
+              "%1<UserId>" .. user_id .. "</UserId>"
+            )
+
+            -- replace original body
+            kong.service.request.set_raw_body(updated_xml)
+
+            kong.log.debug("Injected x-user-id into XML body successfully.")
+          end
+
+          inject_header_into_xml_body()
+        body_filter: []
+        certificate: []
+        header_filter: []
+        log: []
+        rewrite: []
+        ws_client_frame: []
+        ws_close: []
+        ws_handshake: []
+        ws_upstream_frame: []
+      enabled: true
+      instance_name: pre-function-request-scenario-01
+      name: pre-function
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    - config:
+        ExternalEntityLoader_Async: false
+        ExternalEntityLoader_CacheTTL: 3600
+        ExternalEntityLoader_Timeout: 1
+        RouteXPathRegisterNs:
+        - soap,http://schemas.xmlsoap.org/soap/envelope/
+        RouteXPathTargets: null
+        SOAPAction_Header: "no"
+        VerboseRequest: null
+        filePathPrefix: null
+        xsdApiSchema: null
+        xsdApiSchemaInclude: {}
+        xsdSoapSchema: null
+        xsdSoapSchemaInclude: {}
+        xsltLibrary: saxon
+        xsltParams: {}
+        xsltTransformAfter: '<?xml version="1.0" encoding="UTF-8"?> <xsl:stylesheet
+          version="3.0"      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"     xmlns:fn="http://www.w3.org/2005/xpath-functions">      <xsl:output
+          method="text" encoding="UTF-8"/>     <xsl:strip-space elements="*"/>      <!--
+          Main template -->     <xsl:template match="/">         <!-- Create a proper
+          JSON XML structure using fn: namespace -->         <xsl:variable name="json-xml">             <fn:map
+          xmlns:fn="http://www.w3.org/2005/xpath-functions">                 <fn:map
+          key="notifications">                     <!-- Dynamically get uniqueId from
+          OrganizationId -->                     <fn:string key="uniqueId">                         <xsl:value-of
+          select="(//*[local-name()=''OrganizationId''])[1]"/>                     </fn:string>                     <!--
+          Extract injected header -->                     <fn:map key="headers">                         <fn:string
+          key="userId">                             <xsl:value-of select="//*[local-name()=''UserId'']"/>                         </fn:string>                     </fn:map>                     <!--
+          END Extract injected header -->                     <fn:array key="notification">                         <!--
+          Process all Notification elements dynamically -->                         <xsl:for-each
+          select="//*[local-name()=''Notification'']">                             <fn:map>                                 <fn:string
+          key="id">                                     <xsl:value-of select="*[local-name()=''Id'']"/>                                 </fn:string>                                 <fn:map
+          key="sObject">                                     <!-- Add static fields
+          first -->                                     <fn:string key="request-type">Request-01</fn:string>                                     <fn:string
+          key="account-type">Savings</fn:string>                                                                          <!--
+          Process all child elements of sObject dynamically -->                                     <xsl:for-each
+          select="*[local-name()=''sObject'']/*">                                         <xsl:variable
+          name="element-name" select="local-name()"/>                                         <xsl:variable
+          name="json-key">                                             <xsl:choose>                                                 <xsl:when
+          test="$element-name=''Id''">id</xsl:when>                                                 <xsl:when
+          test="$element-name=''fieldsToNull''">fieldsToNull</xsl:when>                                                 <xsl:when
+          test="$element-name=''CLIENTID__c''">clientId</xsl:when>                                                 <xsl:when
+          test="$element-name=''CreatedDate''">createdDate</xsl:when>                                                 <xsl:when
+          test="$element-name=''LastModifiedDate''">lastModifiedDate</xsl:when>                                                 <xsl:when
+          test="$element-name=''EXECMODE__c''">execMode</xsl:when>                                                 <xsl:when
+          test="$element-name=''Name''">name</xsl:when>                                                 <xsl:when
+          test="$element-name=''Request__c''">request</xsl:when>                                                 <xsl:when
+          test="$element-name=''SVCNAME__c''">svcName</xsl:when>                                                 <xsl:when
+          test="$element-name=''VERSION__c''">version</xsl:when>                                                 <xsl:when
+          test="$element-name=''Reference_Number__c''">referenceNumber</xsl:when>                                                 <xsl:otherwise>                                                     <xsl:value-of
+          select="translate($element-name, ''ABCDEFGHIJKLMNOPQRSTUVWXYZ'', ''abcdefghijklmnopqrstuvwxyz'')"/>                                                 </xsl:otherwise>                                             </xsl:choose>                                         </xsl:variable>                                                                                  <xsl:choose>                                             <!--
+          Handle fieldsToNull as array if present -->                                             <xsl:when
+          test="$element-name=''fieldsToNull''">                                                 <fn:array
+          key="{$json-key}">                                                     <fn:string><xsl:value-of
+          select="normalize-space(.)"/></fn:string>                                                 </fn:array>                                             </xsl:when>                                             <!--
+          Handle Request__c - try to parse as JSON if it starts with { -->                                             <xsl:when
+          test="$element-name=''Request__c'' and starts-with(normalize-space(.), ''{'')">                                                 <xsl:variable
+          name="request-content" select="normalize-space(.)"/>                                                 <!--
+          For JSON content in CDATA, we''ll keep it as string for now -->                                                 <!--
+          This will be properly formatted JSON string in the output -->                                                 <fn:string
+          key="{$json-key}">                                                     <xsl:value-of
+          select="$request-content"/>                                                 </fn:string>                                             </xsl:when>                                             <!--
+          Handle all other elements as strings -->                                             <xsl:otherwise>                                                 <fn:string
+          key="{$json-key}">                                                     <xsl:value-of
+          select="normalize-space(.)"/>                                                 </fn:string>                                             </xsl:otherwise>                                         </xsl:choose>                                     </xsl:for-each>                                 </fn:map>                             </fn:map>                         </xsl:for-each>                     </fn:array>                 </fn:map>             </fn:map>         </xsl:variable>                  <!--
+          Convert the properly structured XML to JSON -->         <xsl:value-of select="xml-to-json($json-xml,
+          map{''indent'':true()})"/>     </xsl:template>  </xsl:stylesheet>'
+        xsltTransformBefore: null
+      enabled: true
+      instance_name: soap-xml-request-handling-01
+      name: soap-xml-request-handling
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+      tags:
+      - xmljsondemo
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+    tags:
+    - xmljsondemo
+  tags:
+  - xmljsondemo
+  write_timeout: 60000

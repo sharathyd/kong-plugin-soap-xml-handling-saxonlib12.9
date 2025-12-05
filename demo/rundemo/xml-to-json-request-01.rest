@@ -1,0 +1,527 @@
+
+### SCENARIO #1 - XML Request to JSON Request
+### - Transform XML request to JSON request
+### - Namespace in the root level 
+### - Namespace in the sObject level 
+### - Nested notifications 
+### - Fields are not mapped in the XSLT, should be ignored Ex:- OrganizationId
+### - Static field & values to add, Ex:- request-type, account-type. 
+### - Inject header Ex:- 'x-user-id: user@example.com'
+
+### Service Name: xml-json-mock-service
+### Upstream End point - http://host.docker.internal:3003
+### Kong End point - http://localhost:9000/xml-json-request-01
+
+
+Help me to generate a XSLT for the below transformation from XML to JSON. use xml to json function
+
+### Input SOAP XML Request 
+<soapenv:Envelope
+	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns="http://soap.sforce.com/2005/09/outbound"
+	xmlns:sf1="urn:sobject.enterprise.soap.sforce.com">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<notifications>
+			<OrganizationId>00D6D00000020HoUAI</OrganizationId>
+			<ActionId>OUTID1240000000000</ActionId>
+			<SessionId>SID</SessionId>
+			<EnterpriseUrl>EnterpriseUrl</EnterpriseUrl>
+			<PartnerUrl>PartnerUrl</PartnerUrl>
+			<Notification>
+				<Id>OUTID1240000000009</Id>
+				<sObject>
+					<sf1:fieldsToNull>nimborum in</sf1:fieldsToNull>
+					<sf1:Id>a7c72000003kNMTAA223</sf1:Id>
+					<sf1:CLIENTID__c>SFDC</sf1:CLIENTID__c>
+					<sf1:CreatedDate>2009-10-14T12:46:36</sf1:CreatedDate>
+					<sf1:LastModifiedDate>2014-10-27T15:14:59</sf1:LastModifiedDate>
+					<sf1:EXECMODE__c>ASYNC</sf1:EXECMODE__c>
+					<sf1:Name>flammas turbine</sf1:Name>
+					<sf1:Request__c>
+						<![CDATA[{"GetValue":{"aadharRefNo":"qcxnd29HBIIlsoCWQKgA5g=="}}]]>
+					</sf1:Request__c>
+					<sf1:SVCNAME__c>GetValue</sf1:SVCNAME__c>
+					<sf1:VERSION__c>1.0</sf1:VERSION__c>
+					<sf1:Reference_Number__c>141421</sf1:Reference_Number__c>
+				</sObject>
+			</Notification>
+			<Notification>
+				<Id>OUTID1240000000010</Id>
+				<sObject>
+					<sf1:fieldsToNull>nimborum in</sf1:fieldsToNull>
+					<sf1:Id>a7c72000003kNMTAA224</sf1:Id>
+					<sf1:CLIENTID__c>SFDC</sf1:CLIENTID__c>
+					<sf1:CreatedDate>2009-10-14T12:46:36</sf1:CreatedDate>
+					<sf1:LastModifiedDate>2014-10-27T15:14:59</sf1:LastModifiedDate>
+					<sf1:EXECMODE__c>ASYNC</sf1:EXECMODE__c>
+					<sf1:Name>flammas turbine new</sf1:Name>
+					<sf1:Request__c>
+						<![CDATA[{"InsertToken":{"aadharNo":"YfOFFhvCHyymfaw2KQiCwg=="}}]]>
+					</sf1:Request__c>
+					<sf1:SVCNAME__c>InsertToken</sf1:SVCNAME__c>
+					<sf1:VERSION__c>1.0</sf1:VERSION__c>
+					<sf1:Reference_Number__c>424424</sf1:Reference_Number__c>
+				</sObject>
+			</Notification>
+		</notifications>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Expected JSON Request
+{
+  "notifications": {
+    "uniqueId": "002v0001h2W7EAI",
+    "notification": [
+      {
+        "id": "OD-123",
+        "sObject": {
+          "id": "a0lNT123",
+          "clientId": "SFDC",
+          "createdDate": "2009-10-14T12:46:36",
+          "request": {
+            "info": {
+              "refno": "xJ/jq/qRw=="
+            }
+          },
+          "svcName": "bank_info"
+        }
+      },
+      {
+        "id": "OD-124",
+        "sObject": {
+          "fieldsToNull": ["nimborum in"],
+          "id": "a0lNT124",
+          "clientId": "SFDC",
+          "createdDate": "2009-10-14T12:46:36",
+          "request": "{\"Mask_Aadar\":{\"aadharNo\":\"bdD0m2k04xJ/jq==\"}}",
+          "svcName": "Aadhar_Mask"
+        }
+      }
+    ]
+  }
+}
+
+### XSLT 
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions">
+
+    <xsl:output method="text" encoding="UTF-8"/>
+    <xsl:strip-space elements="*"/>
+
+    <!-- Main template -->
+    <xsl:template match="/">
+        <!-- Create a proper JSON XML structure using fn: namespace -->
+        <xsl:variable name="json-xml">
+            <fn:map xmlns:fn="http://www.w3.org/2005/xpath-functions">
+                <fn:map key="notifications">
+                    <!-- Dynamically get uniqueId from OrganizationId -->
+                    <fn:string key="uniqueId">
+                        <xsl:value-of select="(//*[local-name()='OrganizationId'])[1]"/>
+                    </fn:string>
+                    <!-- Extract injected header -->
+                    <fn:map key="headers">
+                        <fn:string key="userId">
+                            <xsl:value-of select="//*[local-name()='UserId']"/>
+                        </fn:string>
+                    </fn:map>
+                    <!-- END Extract injected header -->
+                    <fn:array key="notification">
+                        <!-- Process all Notification elements dynamically -->
+                        <xsl:for-each select="//*[local-name()='Notification']">
+                            <fn:map>
+                                <fn:string key="id">
+                                    <xsl:value-of select="*[local-name()='Id']"/>
+                                </fn:string>
+                                <fn:map key="sObject">
+                                    <!-- Add static fields first -->
+                                    <fn:string key="request-type">Request-01</fn:string>
+                                    <fn:string key="account-type">Savings</fn:string>
+                                    
+                                    <!-- Process all child elements of sObject dynamically -->
+                                    <xsl:for-each select="*[local-name()='sObject']/*">
+                                        <xsl:variable name="element-name" select="local-name()"/>
+                                        <xsl:variable name="json-key">
+                                            <xsl:choose>
+                                                <xsl:when test="$element-name='Id'">id</xsl:when>
+                                                <xsl:when test="$element-name='fieldsToNull'">fieldsToNull</xsl:when>
+                                                <xsl:when test="$element-name='CLIENTID__c'">clientId</xsl:when>
+                                                <xsl:when test="$element-name='CreatedDate'">createdDate</xsl:when>
+                                                <xsl:when test="$element-name='LastModifiedDate'">lastModifiedDate</xsl:when>
+                                                <xsl:when test="$element-name='EXECMODE__c'">execMode</xsl:when>
+                                                <xsl:when test="$element-name='Name'">name</xsl:when>
+                                                <xsl:when test="$element-name='Request__c'">request</xsl:when>
+                                                <xsl:when test="$element-name='SVCNAME__c'">svcName</xsl:when>
+                                                <xsl:when test="$element-name='VERSION__c'">version</xsl:when>
+                                                <xsl:when test="$element-name='Reference_Number__c'">referenceNumber</xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:value-of select="translate($element-name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </xsl:variable>
+                                        
+                                        <xsl:choose>
+                                            <!-- Handle fieldsToNull as array if present -->
+                                            <xsl:when test="$element-name='fieldsToNull'">
+                                                <fn:array key="{$json-key}">
+                                                    <fn:string><xsl:value-of select="normalize-space(.)"/></fn:string>
+                                                </fn:array>
+                                            </xsl:when>
+                                            <!-- Handle Request__c - try to parse as JSON if it starts with { -->
+                                            <xsl:when test="$element-name='Request__c' and starts-with(normalize-space(.), '{')">
+                                                <xsl:variable name="request-content" select="normalize-space(.)"/>
+                                                <!-- For JSON content in CDATA, we'll keep it as string for now -->
+                                                <!-- This will be properly formatted JSON string in the output -->
+                                                <fn:string key="{$json-key}">
+                                                    <xsl:value-of select="$request-content"/>
+                                                </fn:string>
+                                            </xsl:when>
+                                            <!-- Handle all other elements as strings -->
+                                            <xsl:otherwise>
+                                                <fn:string key="{$json-key}">
+                                                    <xsl:value-of select="normalize-space(.)"/>
+                                                </fn:string>
+                                            </xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:for-each>
+                                </fn:map>
+                            </fn:map>
+                        </xsl:for-each>
+                    </fn:array>
+                </fn:map>
+            </fn:map>
+        </xsl:variable>
+        
+        <!-- Convert the properly structured XML to JSON -->
+        <xsl:value-of select="xml-to-json($json-xml, map{'indent':true()})"/>
+    </xsl:template>
+
+</xsl:stylesheet>
+
+
+### Curl command - namespace in the root level and inject header
+ curl --location 'http://localhost:9000/xml-json-request-01' \
+--header 'Content-Type: application/xml' \
+--header 'x-user-id: user@example.com' \
+--data '<soapenv:Envelope
+	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns="http://soap.sforce.com/2005/09/outbound"
+	xmlns:sf1="urn:sobject.enterprise.soap.sforce.com">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<notifications>
+			<OrganizationId>00D6D00000020HoUAI</OrganizationId>
+			<ActionId>OUTID1240000000000</ActionId>
+			<SessionId>SID</SessionId>
+			<EnterpriseUrl>EnterpriseUrl</EnterpriseUrl>
+			<PartnerUrl>PartnerUrl</PartnerUrl>
+			<Notification>
+				<Id>OUTID1240000000009</Id>
+				<sObject>
+					<sf1:fieldsToNull>nimborum in</sf1:fieldsToNull>
+					<sf1:Id>a7c72000003kNMTAA223</sf1:Id>
+					<sf1:CLIENTID__c>SFDC</sf1:CLIENTID__c>
+					<sf1:CreatedDate>2009-10-14T12:46:36</sf1:CreatedDate>
+					<sf1:LastModifiedDate>2014-10-27T15:14:59</sf1:LastModifiedDate>
+					<sf1:EXECMODE__c>ASYNC</sf1:EXECMODE__c>
+					<sf1:Name>flammas turbine</sf1:Name>
+					<sf1:Request__c>
+						<![CDATA[{"GetValue":{"aadharRefNo":"qcxnd29HBIIlsoCWQKgA5g=="}}]]>
+					</sf1:Request__c>
+					<sf1:SVCNAME__c>GetValue</sf1:SVCNAME__c>
+					<sf1:VERSION__c>1.0</sf1:VERSION__c>
+					<sf1:Reference_Number__c>141421</sf1:Reference_Number__c>
+				</sObject>
+			</Notification>
+			<Notification>
+				<Id>OUTID1240000000010</Id>
+				<sObject>
+					<sf1:fieldsToNull>nimborum in</sf1:fieldsToNull>
+					<sf1:Id>a7c72000003kNMTAA224</sf1:Id>
+					<sf1:CLIENTID__c>SFDC</sf1:CLIENTID__c>
+					<sf1:CreatedDate>2009-10-14T12:46:36</sf1:CreatedDate>
+					<sf1:LastModifiedDate>2014-10-27T15:14:59</sf1:LastModifiedDate>
+					<sf1:EXECMODE__c>ASYNC</sf1:EXECMODE__c>
+					<sf1:Name>flammas turbine new</sf1:Name>
+					<sf1:Request__c>
+						<![CDATA[{"InsertToken":{"aadharNo":"YfOFFhvCHyymfaw2KQiCwg=="}}]]>
+					</sf1:Request__c>
+					<sf1:SVCNAME__c>InsertToken</sf1:SVCNAME__c>
+					<sf1:VERSION__c>1.0</sf1:VERSION__c>
+					<sf1:Reference_Number__c>424424</sf1:Reference_Number__c>
+				</sObject>
+			</Notification>
+		</notifications>
+	</soapenv:Body>
+</soapenv:Envelope>'
+
+
+### curl response
+{
+  "notifications": {
+    "uniqueId": "00D6D00000020HoUAI",
+    "notification": [
+      {
+        "id": "OUTID1240000000009",
+        "sObject": {
+          "fieldsToNull": [
+            "nimborum in"
+          ],
+          "id": "a7c72000003kNMTAA223",
+          "clientId": "SFDC",
+          "createdDate": "2009-10-14T12:46:36",
+          "lastModifiedDate": "2014-10-27T15:14:59",
+          "execMode": "ASYNC",
+          "name": "flammas turbine",
+          "request": "{\"GetValue\":{\"aadharRefNo\":\"qcxnd29HBIIlsoCWQKgA5g==\"}}",
+          "svcName": "GetValue",
+          "version": "1.0",
+          "referenceNumber": "141421"
+        }
+      },
+      {
+        "id": "OUTID1240000000010",
+        "sObject": {
+          "fieldsToNull": [
+            "nimborum in"
+          ],
+          "id": "a7c72000003kNMTAA224",
+          "clientId": "SFDC",
+          "createdDate": "2009-10-14T12:46:36",
+          "lastModifiedDate": "2014-10-27T15:14:59",
+          "execMode": "ASYNC",
+          "name": "flammas turbine new",
+          "request": "{\"InsertToken\":{\"aadharNo\":\"YfOFFhvCHyymfaw2KQiCwg==\"}}",
+          "svcName": "InsertToken",
+          "version": "1.0",
+          "referenceNumber": "424424"
+        }
+      }
+    ]
+  }
+}
+
+### Curl command - namespace in the sObject level 
+curl --location 'http://localhost:9000/xml-json-request-01' \
+--header 'Content-Type: application/xml' \
+--header 'x-user-id: user@example.com' \
+--data '<soapenv:Envelope
+    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Body>
+        <notifications xmlns="http://soap.sforce.com/2005/09/outbound">
+            <OrganizationId>00D6D00000020HoUAI</OrganizationId>
+            <ActionId>04k5g0000008Oy8AAE</ActionId>
+            <SessionId xsi:nil="true"/>
+            <EnterpriseUrl>EnterpriseUrl</EnterpriseUrl>
+            <PartnerUrl>PartnerUrl</PartnerUrl>
+            <Notification>
+                <Id>04l7200000DapyzAAB</Id>
+                <sObject xsi:type="sf:Integration_Message__c"
+                    xmlns:sf1="urn:sobject.enterprise.soap.sforce.com">
+                    <sf1:Id>a2T72000001HU9BEAW</sf1:Id>
+                    <sf1:CLIENTID__c>SFDC</sf1:CLIENTID__c>
+                    <sf1:CreatedDate>2025-09-09T05:07:19.000Z</sf1:CreatedDate>
+                    <sf1:EXECMODE__c>ASYNC</sf1:EXECMODE__c>
+                    <sf1:LastModifiedDate>2025-09-09T05:07:19.000Z</sf1:LastModifiedDate>
+                    <sf1:Name>a2T72000001HU17</sf1:Name>
+                    <sf1:Reference_Number__c>401000033313</sf1:Reference_Number__c>
+                    <sf1:Request__c><![CDATA[{
+    "GetValue": {
+        "aadharRefNo": "qcxnd29HBIIlsoCWQKgA5g=="
+    }
+}]]></sf1:Request__c>
+                    <sf1:SVCNAME__c>GetValue</sf1:SVCNAME__c>
+                    <sf1:VERSION__c>1.0</sf1:VERSION__c>
+                </sObject>
+            </Notification>
+        </notifications>
+    </soapenv:Body>
+</soapenv:Envelope>'
+
+### curl output
+{
+  "notifications": {
+    "uniqueId": "00D6D00000020HoUAI",
+    "headers": {
+      "userId": "user@example.com"
+    },
+    "notification": [
+      {
+        "id": "04l7200000DapyzAAB",
+        "sObject": {
+          "request-type": "Request-01",
+          "account-type": "Savings",
+          "id": "a2T72000001HU9BEAW",
+          "clientId": "SFDC",
+          "createdDate": "2025-09-09T05:07:19.000Z",
+          "execMode": "ASYNC",
+          "lastModifiedDate": "2025-09-09T05:07:19.000Z",
+          "name": "a2T72000001HU17",
+          "referenceNumber": "401000033313",
+          "request": "{ \"GetValue\": { \"aadharRefNo\": \"qcxnd29HBIIlsoCWQKgA5g==\" } }",
+          "svcName": "GetValue",
+          "version": "1.0"
+        }
+      }
+    ]
+  }
+}
+
+
+#### --------------header injection ########### ----------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions">
+
+    <xsl:output method="text" encoding="UTF-8"/>
+    <xsl:strip-space elements="*"/>
+
+    <!-- Parameters for header injection - these will be passed from Kong -->
+    <xsl:param name="x-request-id" select="''"/>
+    <xsl:param name="x-correlation-id" select="''"/>
+    <xsl:param name="x-user-id" select="''"/>
+    <xsl:param name="x-client-ip" select="''"/>
+    <xsl:param name="authorization" select="''"/>
+    <xsl:param name="x-forwarded-for" select="''"/>
+    <xsl:param name="user-agent" select="''"/>
+    <xsl:param name="x-api-key" select="''"/>
+    <xsl:param name="x-tenant-id" select="''"/>
+    <xsl:param name="x-source-system" select="''"/>
+
+    <!-- Main template -->
+    <xsl:template match="/">
+        <!-- Create a proper JSON XML structure using fn: namespace -->
+        <xsl:variable name="json-xml">
+            <fn:map xmlns:fn="http://www.w3.org/2005/xpath-functions">
+                <fn:map key="notifications">
+                    <!-- Dynamically get uniqueId from OrganizationId -->
+                    <fn:string key="uniqueId">
+                        <xsl:value-of select="(//*[local-name()='OrganizationId'])[1]"/>
+                    </fn:string>
+                    
+                    <!-- Header injection section -->
+                    <xsl:if test="$x-request-id != '' or $x-correlation-id != '' or $x-user-id != '' or $x-client-ip != '' or $authorization != '' or $x-forwarded-for != '' or $user-agent != '' or $x-api-key != '' or $x-tenant-id != '' or $x-source-system != ''">
+                        <fn:map key="headers">
+                            <xsl:if test="$x-request-id != ''">
+                                <fn:string key="requestId"><xsl:value-of select="$x-request-id"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-correlation-id != ''">
+                                <fn:string key="correlationId"><xsl:value-of select="$x-correlation-id"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-user-id != ''">
+                                <fn:string key="userId"><xsl:value-of select="$x-user-id"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-client-ip != ''">
+                                <fn:string key="clientIp"><xsl:value-of select="$x-client-ip"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$authorization != ''">
+                                <fn:string key="authorization"><xsl:value-of select="$authorization"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-forwarded-for != ''">
+                                <fn:string key="forwardedFor"><xsl:value-of select="$x-forwarded-for"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$user-agent != ''">
+                                <fn:string key="userAgent"><xsl:value-of select="$user-agent"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-api-key != ''">
+                                <fn:string key="apiKey"><xsl:value-of select="$x-api-key"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-tenant-id != ''">
+                                <fn:string key="tenantId"><xsl:value-of select="$x-tenant-id"/></fn:string>
+                            </xsl:if>
+                            <xsl:if test="$x-source-system != ''">
+                                <fn:string key="sourceSystem"><xsl:value-of select="$x-source-system"/></fn:string>
+                            </xsl:if>
+                        </fn:map>
+                    </xsl:if>
+                    
+                    <fn:array key="notification">
+                        <!-- Process all Notification elements dynamically -->
+                        <xsl:for-each select="//*[local-name()='Notification']">
+                            <fn:map>
+                                <fn:string key="id">
+                                    <xsl:value-of select="*[local-name()='Id']"/>
+                                </fn:string>
+                                <fn:map key="sObject">
+                                    <!-- Add static fields first -->
+                                    <fn:string key="request-type">Request-01</fn:string>
+                                    <fn:string key="account-type">Savings</fn:string>
+                                    
+                                    <!-- Add header-based fields if available -->
+                                    <xsl:if test="$x-request-id != ''">
+                                        <fn:string key="requestId"><xsl:value-of select="$x-request-id"/></fn:string>
+                                    </xsl:if>
+                                    <xsl:if test="$x-correlation-id != ''">
+                                        <fn:string key="correlationId"><xsl:value-of select="$x-correlation-id"/></fn:string>
+                                    </xsl:if>
+                                    <xsl:if test="$x-tenant-id != ''">
+                                        <fn:string key="tenantId"><xsl:value-of select="$x-tenant-id"/></fn:string>
+                                    </xsl:if>
+                                    
+                                    <!-- Process all child elements of sObject dynamically -->
+                                    <xsl:for-each select="*[local-name()='sObject']/*">
+                                        <xsl:variable name="element-name" select="local-name()"/>
+                                        <xsl:variable name="json-key">
+                                            <xsl:choose>
+                                                <xsl:when test="$element-name='Id'">id</xsl:when>
+                                                <xsl:when test="$element-name='fieldsToNull'">fieldsToNull</xsl:when>
+                                                <xsl:when test="$element-name='CLIENTID__c'">clientId</xsl:when>
+                                                <xsl:when test="$element-name='CreatedDate'">createdDate</xsl:when>
+                                                <xsl:when test="$element-name='LastModifiedDate'">lastModifiedDate</xsl:when>
+                                                <xsl:when test="$element-name='EXECMODE__c'">execMode</xsl:when>
+                                                <xsl:when test="$element-name='Name'">name</xsl:when>
+                                                <xsl:when test="$element-name='Request__c'">request</xsl:when>
+                                                <xsl:when test="$element-name='SVCNAME__c'">svcName</xsl:when>
+                                                <xsl:when test="$element-name='VERSION__c'">version</xsl:when>
+                                                <xsl:when test="$element-name='Reference_Number__c'">referenceNumber</xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:value-of select="translate($element-name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </xsl:variable>
+                                        
+                                        <xsl:choose>
+                                            <!-- Handle fieldsToNull as array if present -->
+                                            <xsl:when test="$element-name='fieldsToNull'">
+                                                <fn:array key="{$json-key}">
+                                                    <fn:string><xsl:value-of select="normalize-space(.)"/></fn:string>
+                                                </fn:array>
+                                            </xsl:when>
+                                            <!-- Handle Request__c - try to parse as JSON if it starts with { -->
+                                            <xsl:when test="$element-name='Request__c' and starts-with(normalize-space(.), '{')">
+                                                <xsl:variable name="request-content" select="normalize-space(.)"/>
+                                                <!-- For JSON content in CDATA, we'll keep it as string for now -->
+                                                <!-- This will be properly formatted JSON string in the output -->
+                                                <fn:string key="{$json-key}">
+                                                    <xsl:value-of select="$request-content"/>
+                                                </fn:string>
+                                            </xsl:when>
+                                            <!-- Handle all other elements as strings -->
+                                            <xsl:otherwise>
+                                                <fn:string key="{$json-key}">
+                                                    <xsl:value-of select="normalize-space(.)"/>
+                                                </fn:string>
+                                            </xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:for-each>
+                                </fn:map>
+                            </fn:map>
+                        </xsl:for-each>
+                    </fn:array>
+                </fn:map>
+            </fn:map>
+        </xsl:variable>
+        
+        <!-- Convert the properly structured XML to JSON -->
+        <xsl:value-of select="xml-to-json($json-xml, map{'indent':true()})"/>
+    </xsl:template>
+
+</xsl:stylesheet>
+
