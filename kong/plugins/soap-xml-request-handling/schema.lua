@@ -10,7 +10,7 @@ return {
     { config = {
         type = "record",
         fields = {
-          { ExternalEntityLoader_Async = { type = "boolean", default = false, required = false }, },
+        --  { ExternalEntityLoader_Async = { type = "boolean", default = false, required = false }, },
           { ExternalEntityLoader_CacheTTL = { type = "integer", default = 3600, required = false }, },
           { ExternalEntityLoader_Timeout = { type = "integer", default = 1, required = false }, },
           { filePathPrefix = typedefs.path { required = false } },
@@ -19,17 +19,17 @@ return {
                 default = {"soap,http://schemas.xmlsoap.org/soap/envelope/"},
             },
           },
-          { RouteXPathTargets = { type = "array", required = false,
-              elements = { type = "record",
-                required = true,
-                fields = {
-                  { URL = typedefs.url( { required = true} ) },
-                  { XPath = {type = "string", required = true} },
-                  { XPathCondition = {type = "string", required = true}}
-                }
-              }
-            } 
-          },          
+        --  { RouteXPathTargets = { type = "array", required = false,
+        --      elements = { type = "record",
+        --        required = true,
+        --        fields = {
+        --          { URL = typedefs.url( { required = true} ) },
+        --          { XPath = {type = "string", required = true} },
+        --          { XPathCondition = {type = "string", required = true}}
+        --        }
+        --      }
+        --    } 
+        --  },          
           { SOAPAction_Header = {required = false, type = "string", default = "no",
             one_of = {
               "no",
@@ -38,16 +38,16 @@ return {
             },
           },},
           { VerboseRequest = { type = "boolean", required = false }, },
-          { xsdApiSchema = { type = "string", required = false }, },
-          { xsdApiSchemaInclude = { type = "map", required = false, 
-              keys = { type = "string", required = true },
-              values = {type = "string", required = true},
-          }},
-          { xsdSoapSchema = { type = "string", required = false, default = XSD_SOAP }, },
-          { xsdSoapSchemaInclude = { type = "map", required = false, 
-            keys = { type = "string", required = true },
-            values = {type = "string", required = true},
-            }},
+        --  { xsdApiSchema = { type = "string", required = false }, },
+        --  { xsdApiSchemaInclude = { type = "map", required = false, 
+        --      keys = { type = "string", required = true },
+        --      values = {type = "string", required = true},
+        --  }},
+        --  { xsdSoapSchema = { type = "string", required = false, default = XSD_SOAP }, },
+        --  { xsdSoapSchemaInclude = { type = "map", required = false, 
+        --    keys = { type = "string", required = true },
+        --    values = {type = "string", required = true},
+        --    }},
           { xsltLibrary = {required = true, type = "string", default = "libxslt",
             one_of = {
               "libxslt",
