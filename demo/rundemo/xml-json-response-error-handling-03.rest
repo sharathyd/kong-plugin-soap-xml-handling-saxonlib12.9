@@ -957,7 +957,7 @@
 
 
 ### ### test with simple xml, backend service echoed xml request. 
-curl --location 'http://localhost:3002/soap-service' \
+curl --location 'http://localhost:4002/soap-service' \
 --header 'Content-Type: application/xml' \
 --data '<test>simple</test>'
 

@@ -201,11 +201,15 @@ Help me to generate a XSLT for the below transformation from XML to JSON. use xm
 
 </xsl:stylesheet>
 
+### echo service to test. This service echo back the JSON request received
+curl -X POST http://localhost:4003/test \
+  -H "Content-Type: application/json" \
+  -d '{"NotificationResponse": {"Ack": "true"}}'
 
 ### Curl command - namespace in the root level and inject header
  curl --location 'http://localhost:9000/xml-json-request-01' \
 --header 'Content-Type: application/xml' \
---header 'x-user-id: user@example.com' \
+--header 'x-user-id: testuser@example.com' \
 --data '<soapenv:Envelope
 	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
 	xmlns="http://soap.sforce.com/2005/09/outbound"
